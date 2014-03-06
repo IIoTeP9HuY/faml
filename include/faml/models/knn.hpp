@@ -6,19 +6,22 @@
 #include <algorithm>
 
 #include "faml/data.hpp"
+#include "faml/distances.hpp"
 
 namespace faml {
 
 template<typename DataType, typename LabelType>
 class KNNClassifier {
 public:
-	KNNClassifier(size_t K, const DistanceFunction &dist, const KernelFunction &kernel): K(K), dist(dist), kernel(kernel) {
+	KNNClassifier(size_t K, const DistanceFunction<DataType> &dist, const KernelFunction &kernel): K(K), dist(dist), kernel(kernel) {
 		if (K == 0) {
 			throw std::invalid_argument("K must be non-zero");
 		}
 	}
 
-	void train(const std::vector<DataType> &samples, const std::vector<LabelType> &labels): samples(samples), labels(labels) {
+	void train(const Table<DataType> &samples, const Table<LabelType> &labels) {
+		this->samples = samples;
+		this->labels = labels;
 	}
 
 	LabelType predict(const DataType &sample) {
@@ -27,7 +30,7 @@ public:
 		}
 
 		std::priority_queue< std::pair<double, size_t> > nearestNeighbors;
-		for (size_t i = 0; i < dataset.size(); ++i) {
+		for (size_t i = 0; i < samples.rowsNumber(); ++i) {
 			double distance = dist(sample, samples[i]);
 			nearestNeighbors.push(std::make_pair(distance, i));
 			if (nearestNeighbors.size() > K) {
@@ -48,10 +51,10 @@ public:
 		return std::max_element(labelWeight.begin(), labelWeight.end(), labelWeightPairComparator)->first;
 	}
 
-	std::vector<LabelType> predict(const std::vector<DataType> &data) {
-		std::vector<LabelType> labels;
+	Table<LabelType> predict(const Table<DataType> &data) {
+		Table<LabelType> labels;
 		for (auto &sample : data) {
-			labels.push_back(predict(sample));
+			labels.addRow(predict(sample));
 		}
 		return labels;
 	}
@@ -62,10 +65,10 @@ private:
 	}
 
 	size_t K;
-	const DistanceFunction &dist;
+	const DistanceFunction<DataType> &dist;
 	const KernelFunction &kernel;
-	std::vector<DataType> samples;
-	std::vector<LabelType> labels;
+	Table<DataType> samples;
+	Table<LabelType> labels;
 };
 
 } // namespace faml

@@ -17,6 +17,8 @@ class Table {
 	typedef typename DataContainer::const_iterator const_iterator;
 public:
 
+	Table() {}
+
 	Table(const std::vector<std::string> &columnsNames): columnsNames(columnsNames) {
 		for (size_t i = 0; i < columnsNumber(); ++i) {
 			columnsNamesIndices[columnsNames[i]] = i;
@@ -51,12 +53,16 @@ public:
 		return data.cend();
 	}
 
+	size_t columnsNumber() const {
+		return columnsNames.size();
+	}
+
 	size_t rowsNumber() const {
 		return data.size();
 	}
 
-	size_t columnsNumber() const {
-		return columnsNames.size();
+	bool empty() const {
+		return rowsNumber() == 0;
 	}
 
 	template<typename NewRowType>
