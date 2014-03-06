@@ -10,6 +10,7 @@
 #include "faml/distances.hpp"
 #include "faml/io.hpp"
 #include "faml/models/knn.hpp"
+#include "faml/preprocessing/scaler.hpp"
 
 using namespace std;
 using namespace faml;
@@ -279,12 +280,6 @@ int main(int argc, char **argv) {
 	std::string trainsetFilename(argv[1]);
 	Table<sampleType> dataset(readCSV<sampleType>(trainsetFilename));
 
-//	vector_normalizer<sample_type> normalizer;
-//	normalizer.train(trainSamples);
-//	for (auto &sample : trainSamples) {
-//		sample = normalizer(sample);
-//	}
-
 //	MatrixXf inverseCovarianceMatrix;
 //	inverseCovarianceMatrix = buildInverseCovarianceMatrix(trainSamples);
 
@@ -305,6 +300,16 @@ int main(int argc, char **argv) {
 				trainSamplesTest, trainLabelsTest,
 				0.1);
 
+	NormalScaler normalScaler;
+	normalScaler.train(trainSamplesTrain);
+
+	for (auto &sample : trainSamplesTrain) {
+		sample = normalScaler(sample);
+	}
+
+	for (auto &sample : trainSamplesTest) {
+		sample = normalScaler(sample);
+	}
 
 	int power = 2;
 
@@ -339,19 +344,20 @@ int main(int argc, char **argv) {
 		std::cout << "K: " << K << " Accuracy: " << statistics.accuracy << std::endl;
 	}
 
-
+/*
 	if (argc == 3) {
 		std::string testsetFilename(argv[2]);
 		Table<sampleType> testSamples(readCSV<sampleType>(testsetFilename));
-//		for (auto &sample : testSamples) {
-//			sample = normalizer(sample);
-//		}
+		for (auto &sample : testSamples) {
+			sample = normalScaler(sample);
+		}
 
 		KNNClassifier<sampleType, labelType> classifier(17, minkowskiDistance, rbfKernel);
 		classifier.train(trainSamples, trainLabels);
 		Table<labelType> trainLabelsTestPrediction = classifier.predict(testSamples);
 //		printPrediction("predictions.csv", trainLabelsTestPrediction);
 	}
+*/
 
 	return 0;
 }

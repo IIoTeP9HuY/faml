@@ -13,6 +13,7 @@ set(LIBRARY_OUTPUT_PATH lib)
 
 file(GLOB HEADERS ${PROJECT_SOURCE_DIR}/include/faml/*.hpp)
 file(GLOB HEADERS ${HEADERS};${PROJECT_SOURCE_DIR}/include/faml/models/*.hpp)
+file(GLOB HEADERS ${HEADERS};${PROJECT_SOURCE_DIR}/include/faml/preprocessing/*.hpp)
 
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
