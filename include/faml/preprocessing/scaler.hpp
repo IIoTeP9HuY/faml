@@ -40,8 +40,7 @@ public:
 			}
 		}
 		for (size_t i = 0; i < F; ++i) {
-			// FIX THIS
-			deviation[i] = 1.0 / sqrt(deviation[i]);
+			deviation[i] = sqrt(deviation[i]);
 		}
 	}
 
