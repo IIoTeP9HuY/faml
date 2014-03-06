@@ -19,5 +19,5 @@ endif()
 
 ADD_LIBRARY(faml SHARED
 	${HEADERS}
-	src/distances
+	src/dummy.cpp
 	)

@@ -2,98 +2,126 @@
 #define DATA_HPP
 
 #include <vector>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <functional>
+#include <stdexcept>
+#include <utility>
 
 namespace faml {
 
 template<typename RowType>
 class Table {
 	typedef std::vector<RowType> DataContainer;
-	typedef std::vector<std::string> IndexContainer;
+	typedef typename DataContainer::iterator iterator;
+	typedef typename DataContainer::const_iterator const_iterator;
 public:
 
-	Table(const std::vector<std::string> &index): indexContainer(index) {
+	Table(const std::vector<std::string> &columnsNames): columnsNames(columnsNames) {
+		for (size_t i = 0; i < columnsNumber(); ++i) {
+			columnsNamesIndices[columnsNames[i]] = i;
+		}
 	}
 
-	void addRow(const RowType &data) {
-		dataContainer.push_back(data);
+	void addRow(const RowType &sample) {
+		data.push_back(sample);
 	}
 
 	RowType &operator [] (size_t index) {
-		return dataContainer[index];
+		return data[index];
 	}
 
 	const RowType &operator [] (size_t index) const {
-		return dataContainer[index];
+		return data[index];
 	}
 
-	DataContainer::iterator begin() {
-		return dataContainer.begin();
+	iterator begin() {
+		return data.begin();
 	}
 
-	DataContainer::const_iterator begin() const {
-		return dataContainer.cbegin();
+	const_iterator begin() const {
+		return data.cbegin();
 	}
 
-	DataContainer::iterator end() {
-		return dataContainer.end();
+	iterator end() {
+		return data.end();
 	}
 
-	DataContainer::const_iterator end() const {
-		return dataContainer.cend();
+	const_iterator end() const {
+		return data.cend();
 	}
 
 	size_t rowsNumber() const {
-		return dataContainer.size();
+		return data.size();
 	}
 
 	size_t columnsNumber() const {
-		return indexContainer.size();
+		return columnsNames.size();
 	}
 
-	void splitOnColumns(std::vector<std::string> splitColumns,
-						DataContainer &notMatchedColumns,
-						DataContainer &matchedColumns) const {
-		notMatchedColumns.resize(rowsNumber());
-		matchedColumns.resize(rowsNumber());
-		std::set<std::string> splitColumnsSet(splitColumns.begin(), splitColumns.end());
+	template<typename NewRowType>
+	Table<NewRowType> cast(std::function<NewRowType(RowType)> castFunction) const {
+		Table<NewRowType> castedTable(columnsNames);
+		for (const RowType &sample : data) {
+			castedTable.addRow(castFunction(sample));
+		}
+		return castedTable;
+	}
 
+	std::pair< Table<RowType>, Table<RowType> > splitOnColumns(const std::vector<std::string> &splitColumnsNames) const {
 		std::vector<char> columnMatches(columnsNumber(), false);
-		size_t matchedColumnsNumber = 0;
-		for (size_t column = 0; column < columnsNumber(); ++column) {
-			if (splitColumnsSet.find(indexContainer[column]) != splitColumnsSet.end()) {
-				++matchedColumnsNumber;
-				columnMatches[column] = true;
+		std::vector<size_t> splitColumnsIndices;
+		for (size_t i = 0; i < splitColumnsNames.size(); ++i) {
+			auto columnIt = columnsNamesIndices.find(splitColumnsNames[i]);
+			if (columnIt == columnsNamesIndices.end()) {
+				throw std::invalid_argument("Can't split on not existing column \"" + splitColumnsNames[i] + "\"");
+			}
+			splitColumnsIndices.push_back(columnIt->second);
+			columnMatches[columnIt->second] = true;
+		}
+
+		std::vector<std::string> notMatchedColumnsNames;
+		std::vector<std::string> matchedColumnsNames;
+		for (size_t i = 0; i < columnsNumber(); ++i) {
+			if (!columnMatches[i]) {
+				notMatchedColumnsNames.push_back(columnsNames[i]);
+			} else {
+				matchedColumnsNames.push_back(columnsNames[i]);
 			}
 		}
 
+		Table<RowType> notMatchedTable(notMatchedColumnsNames);
+		Table<RowType> matchedTable(matchedColumnsNames);
+
 		for (size_t row = 0; row < rowsNumber(); ++row) {
-			RowType notMatchedRowColumns(columnsNumber() - matchedColumnsNumber);
-			RowType matchedRowColumns(matchedColumnsNumber);
+			RowType notMatchedRowColumns(notMatchedTable.columnsNumber());
+			RowType matchedRowColumns(matchedTable.columnsNumber());
 			size_t notMatchedRowColumnsNumber = 0;
 			size_t matchedRowColumnsNumber = 0;
 
 			for (size_t column = 0; column < columnsNumber(); ++column) {
 				if (!columnMatches[column]) {
-					notMatchedRowColumns[notMatchedRowColumnsNumber++] = dataContainer[row][column];
+					notMatchedRowColumns[notMatchedRowColumnsNumber++] = data[row][column];
 				} else {
-					matchedRowColumns[matchedRowColumnsNumber++] = dataContainer[row][column];
+					matchedRowColumns[matchedRowColumnsNumber++] = data[row][column];
 				}
 			}
 
-			notMatchedColumns.push_back(notMatchedRowColumns);
-			matchedColumns.push_back(matchedRowColumnsNumber);
+			notMatchedTable.addRow(notMatchedRowColumns);
+			matchedTable.addRow(matchedRowColumns);
 		}
+
+		return std::make_pair(notMatchedTable, matchedTable);
 	}
 
-	IndexContainer& indices() {
-		return indexContainer;
+	const std::vector<std::string>& getColumnsNames() const {
+		return columnsNames;
 	}
 
 private:
-	DataContainer dataContainer;
-	IndexContainer indexContainer;
+	DataContainer data;
+	std::vector<std::string> columnsNames;
+	std::unordered_map<std::string, size_t> columnsNamesIndices;
 };
 
 } // namespace faml
