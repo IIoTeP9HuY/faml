@@ -4,6 +4,7 @@ project(faml CXX)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 add_definitions(-O2 --std=c++0x)
+add_definitions(-fopenmp)
 
 set(BUILD_EXAMPLES TRUE)
 
@@ -21,3 +22,5 @@ ADD_LIBRARY(faml SHARED
 	${HEADERS}
 	src/dummy.cpp
 	)
+
+target_link_libraries(faml gomp)

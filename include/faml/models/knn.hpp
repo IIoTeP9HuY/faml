@@ -20,18 +20,18 @@ public:
 	}
 
 	void train(const Table<DataType> &samples, const Table<LabelType> &labels) {
-		this->samples = samples;
-		this->labels = labels;
+		this->baseSamples = samples;
+		this->baseLabels = labels;
 	}
 
 	LabelType predict(const DataType &sample) {
-		if (samples.empty()) {
+		if (baseSamples.empty()) {
 			throw std::logic_error("Classifier is not trained");
 		}
 
 		std::priority_queue< std::pair<double, size_t> > nearestNeighbors;
-		for (size_t i = 0; i < samples.rowsNumber(); ++i) {
-			double distance = dist(sample, samples[i]);
+		for (size_t i = 0; i < baseSamples.rowsNumber(); ++i) {
+			double distance = dist(sample, baseSamples[i]);
 			nearestNeighbors.push(std::make_pair(distance, i));
 			if (nearestNeighbors.size() > K) {
 				nearestNeighbors.pop();
@@ -45,16 +45,19 @@ public:
 			std::pair<double, size_t> neighbor = nearestNeighbors.top();
 			nearestNeighbors.pop();
 			neighbor.first /= maxDistance;
-			labelWeight[labels[neighbor.second]] += kernel(neighbor.first);
+			labelWeight[baseLabels[neighbor.second]] += kernel(neighbor.first);
 		}
 
 		return std::max_element(labelWeight.begin(), labelWeight.end(), labelWeightPairComparator)->first;
 	}
 
-	Table<LabelType> predict(const Table<DataType> &data) {
-		Table<LabelType> labels;
-		for (auto &sample : data) {
-			labels.addRow(predict(sample));
+	Table<LabelType> predict(const Table<DataType> &samples) {
+		Table<LabelType> labels(baseLabels.getColumnsNames());
+		labels.resizeRows(samples.rowsNumber());
+
+		#pragma omp parallel for
+		for (size_t i = 0; i < samples.rowsNumber(); ++i) {
+			labels[i] = predict(samples[i]);
 		}
 		return labels;
 	}
@@ -67,8 +70,8 @@ private:
 	size_t K;
 	const DistanceFunction<DataType> &dist;
 	const KernelFunction &kernel;
-	Table<DataType> samples;
-	Table<LabelType> labels;
+	Table<DataType> baseSamples;
+	Table<LabelType> baseLabels;
 };
 
 } // namespace faml

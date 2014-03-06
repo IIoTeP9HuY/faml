@@ -29,6 +29,10 @@ public:
 		data.push_back(sample);
 	}
 
+	void resizeRows(size_t size) {
+		data.resize(size);
+	}
+
 	RowType &operator [] (size_t index) {
 		return data[index];
 	}
