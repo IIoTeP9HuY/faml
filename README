@@ -1,0 +1,6 @@
+Faml is FAst Machine Learning library for C++
+
+Requirements:
+	- gcc 4.8
+	- CMake 2.8
+	- Eigen (http://eigen.tuxfamily.org/)
