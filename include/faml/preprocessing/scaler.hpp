@@ -97,10 +97,11 @@ private:
 
 template <typename T>
 class DummyScaler : public Scaler<T> {
+public:
 	virtual ~DummyScaler() {}
 
 	virtual void train(const Table<T>&) {}
-	virtual T operator () (const T&) const {}
+	virtual T operator () (const T& sample) const { return sample; }
 	virtual std::string toString() const {
 		return "DummyScaler";
 	}
