@@ -268,14 +268,42 @@ MatrixXf buildInverseCovarianceMatrix(const Table<DataType> &samples) {
 //	}
 //}
 
+class Timer {
+public:
+	Timer(const std::string &name): name(name), startTime(clock()), stopped(false) {
+	}
+
+	~Timer() {
+		if (!stopped) {
+			stop();
+		}
+	}
+
+	void stop() {
+		size_t stopTime = clock();
+		double deltaMs = (stopTime - startTime) * 1.0 / CLOCKS_PER_SEC;
+		std::cerr << name << " elapsed: " << deltaMs << " ms";
+		stopped = true;
+	}
+
+private:
+	std::string name;
+	size_t startTime;
+	bool stopped;
+};
+
 typedef VectorXf sampleType;
 typedef size_t labelType;
 
 int main(int argc, char **argv) {
+	Timer predictTimer("predict");
+
 	if(argc < 2) {
 		cerr << "usage: " << argv[0] << " train [test]" << endl;
 		exit(EXIT_FAILURE);
 	}
+
+	Timer prepareTimer("prepare");
 
 	std::string trainsetFilename(argv[1]);
 	Table<sampleType> dataset(readCSV<sampleType>(trainsetFilename));
@@ -335,13 +363,18 @@ int main(int argc, char **argv) {
 	CosineDistance<sampleType> cosineDistance;
 	OverlapDistance<sampleType> overlapDistance;
 
-	for (size_t K = 1; K < 20; ++K) {
-		KNNClassifier<sampleType, labelType> classifier(K, minkowskiDistance, quarticKernel);
-		classifier.train(trainSamplesTrain, trainLabelsTrain);
-		Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTest);
+	prepareTimer.stop();
 
-		PredictionStatistics statistics = calculatePredictionStatistics(trainLabelsTest, trainLabelsTestPrediction);
-		std::cout << "K: " << K << " Accuracy: " << statistics.accuracy << std::endl;
+	{
+		Timer knnRunsTimer("knn runs");
+		for (size_t K = 1; K < 20; ++K) {
+			KNNClassifier<sampleType, labelType> classifier(K, minkowskiDistance, quarticKernel);
+			classifier.train(trainSamplesTrain, trainLabelsTrain);
+			Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTest);
+
+			PredictionStatistics statistics = calculatePredictionStatistics(trainLabelsTest, trainLabelsTestPrediction);
+			std::cout << "K: " << K << " Accuracy: " << statistics.accuracy << std::endl;
+		}
 	}
 
 /*
