@@ -69,11 +69,23 @@ public:
 		return rowsNumber() == 0;
 	}
 
-	template<typename NewRowType>
-	Table<NewRowType> cast(std::function<NewRowType(RowType)> castFunction) const {
+	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
+	Table<NewRowType> cast(FunctionType castFunction) const {
 		Table<NewRowType> castedTable(columnsNames);
 		for (const RowType &sample : data) {
 			castedTable.addRow(castFunction(sample));
+		}
+		return castedTable;
+	}
+
+	template <typename NewRowType, typename FunctionType>
+	Table<NewRowType> castByElement(FunctionType castFunction) const {
+		Table<NewRowType> castedTable(columnsNames);
+		for (const RowType &sample : data) {
+			NewRowType newRow(sample.size());
+			for(size_t i = 0; i < sample.size(); ++i)
+				newRow[i] = castFunction(sample[i]);
+			castedTable.addRow(newRow);
 		}
 		return castedTable;
 	}
