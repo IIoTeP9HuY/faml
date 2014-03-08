@@ -16,6 +16,12 @@ public:
 
 	virtual DataType operator () (const DataType &sample) const = 0;
 
+	virtual Table<DataType> operator () (const Table<DataType> &samples) {
+		return samples.cast(
+					[&] (const DataType &sample) { return (*this)(sample); }
+		);
+	}
+
 	virtual std::string toString() const = 0;
 };
 
