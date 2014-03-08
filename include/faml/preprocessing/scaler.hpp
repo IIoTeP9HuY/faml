@@ -15,6 +15,8 @@ public:
 	virtual void train(const Table<DataType> &samples) = 0;
 
 	virtual DataType operator () (const DataType &sample) const = 0;
+
+	virtual std::string toString() const = 0;
 };
 
 class NormalScaler : public Scaler<Eigen::VectorXf> {
@@ -48,6 +50,10 @@ public:
 		return (sample - mean).cwiseQuotient(deviation);
 	}
 
+	std::string toString() const {
+		return "NormalScaler";
+	}
+
 private:
 	DataType mean;
 	DataType deviation;
@@ -58,7 +64,11 @@ class MinMaxScaler : public Scaler<Eigen::VectorXf> {
 public:
 	MinMaxScaler(const DataType &lowerBound, const DataType &upperBound):
 		lowerBound(lowerBound), upperBound(upperBound) {}
-	~MinMaxScaler() {}
+
+	MinMaxScaler(size_t n, double lowerBound, double upperBound): lowerBound(VectorXf::Ones(n) * lowerBound),
+	                                                              upperBound(VectorXf::Ones(n) * upperBound){
+	}
+	virtual ~MinMaxScaler() {}
 
 	void train(const Table<DataType> &samples) {
 		for (const auto &sample : samples) {
@@ -71,9 +81,25 @@ public:
 		return (sample - minValues).cwiseQuotient(maxValues - minValues).cwiseProduct(upperBound - lowerBound) + lowerBound;
 	}
 
+	std::string toString() const {
+		return "MinMaxScaler";
+	}
+
 private:
 	DataType lowerBound, upperBound;
 	DataType minValues, maxValues;
+};
+
+template <typename T>
+class DummyScaler : public Scaler<T> {
+	virtual ~DummyScaler() {}
+
+	virtual void train(const Table<T>&) {}
+	virtual T operator () (const T&) const {}
+	virtual std::string toString() const {
+		return "DummyScaler";
+	}
+
 };
 
 } // namespace faml
