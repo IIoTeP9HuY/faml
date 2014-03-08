@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
 
 	WMinkowskiDistance wminkowskiDistance(power, weights);
 	// MulticlassWMinkowskiDistance multiclassWminkowskiDistance(power, multiclassWeights);
-	 MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
+	MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
 	CosineDistance cosineDistance;
 	OverlapDistance overlapDistance;
 

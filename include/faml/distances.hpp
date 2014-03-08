@@ -161,7 +161,11 @@ struct MahalanobisDistance : DistanceFunction<VectorXf> {
 		distance = sqrt((lhs - rhs).transpose() * inverseCovarianceMatrix * (lhs - rhs));
 		return distance;
 	}
+	std::string toString() const {
+		return "MahalanobisDistance";
+	}
 
+private:
 	MatrixXf inverseCovarianceMatrix;
 };
 
