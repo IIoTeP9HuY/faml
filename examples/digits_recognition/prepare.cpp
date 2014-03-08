@@ -46,8 +46,8 @@ struct TrainObject
 		// 	}
 		// }
 
-		int partHNumber = 7;
-		int partWNumber = 7;
+		int partHNumber = 14;
+		int partWNumber = 14;
 		int partHeight = (H + partHNumber - 1) / partHNumber;
 		int partWidth = (W + partWNumber - 1) / partWNumber;
 
@@ -64,7 +64,6 @@ struct TrainObject
 			}
 		}
 
-/*
 		partHNumber = 1;
 		partWNumber = 7;
 		partHeight = (H + partHNumber - 1) / partHNumber;
@@ -118,7 +117,6 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
-*/
 
 		// for (int h = H / 3; h < H - H / 3; ++h)
 		// {
@@ -220,10 +218,10 @@ struct TrainObject
 		// featureVector.push_back(blackComponentsNumber);
 
 		/*
-		int partHNumber = 5;
-		int partWNumber = 5;
-		int partHeight = (imageH + partHNumber - 1) / partHNumber;
-		int partWidth = (imageW + partWNumber - 1) / partWNumber;
+		partHNumber = 5;
+		partWNumber = 5;
+		partHeight = (imageH + partHNumber - 1) / partHNumber;
+		partWidth = (imageW + partWNumber - 1) / partWNumber;
 
 		for (int i = 0; i < partHNumber; ++i)
 		{
@@ -237,6 +235,7 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
+		*/
 
 		partHNumber = 1;
 		partWNumber = 3;
@@ -278,7 +277,6 @@ struct TrainObject
 		partWNumber = 2;
 		partHeight = (imageH + partHNumber - 1) / partHNumber;
 		partWidth = (imageW + partWNumber - 1) / partWNumber;
-		*/
 
 		// for (int i = 0; i < partHNumber; ++i)
 		// {
@@ -941,7 +939,7 @@ void buildFeatureVectors(std::vector<TrainObject>& trainObjects,
 	}
 	if (isTraining)
 	{
-		out << "Number" << std::endl;
+		out << "label" << std::endl;
 	}
 	else
 	{
