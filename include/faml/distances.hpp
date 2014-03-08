@@ -21,18 +21,31 @@ struct DistanceFunction {
 	virtual double operator ()(const T &lhs, const T &rhs) const {}
 };
 
-template<typename T>
-struct MinkowskiDistance : DistanceFunction<T> {
+struct EuclidianDistance : DistanceFunction<VectorXf> {
+	EuclidianDistance() {}
+
+	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
+		size_t N = lhs.size();
+		if (lhs.size() != rhs.size()) {
+			throw std::invalid_argument("Arguments should have same length");
+		}
+
+		double distance = (rhs - lhs).norm();
+		return distance;
+	}
+};
+
+struct MinkowskiDistance : DistanceFunction<VectorXf> {
 	MinkowskiDistance(size_t power): power(power) {}
 
-	double operator ()(const T &lhs, const T &rhs) const {
+	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}
 
 		double distance = 0;
-		T delta = rhs - lhs;
+		VectorXf delta = rhs - lhs;
 
 		for (size_t i = 0; i < N; ++i) {
 			distance += fastpow(fabs(delta[i]), power);
@@ -44,11 +57,10 @@ struct MinkowskiDistance : DistanceFunction<T> {
 	size_t power;
 };
 
-template<typename T>
-struct CosineDistance : DistanceFunction<T> {
+struct CosineDistance : DistanceFunction<VectorXf> {
 	CosineDistance() {}
 
-	double operator ()(const T &lhs, const T &rhs) const {
+	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
@@ -64,11 +76,10 @@ struct CosineDistance : DistanceFunction<T> {
 	}
 };
 
-template<typename T>
-struct OverlapDistance : DistanceFunction<T> {
+struct OverlapDistance : DistanceFunction<VectorXf> {
 	OverlapDistance() {}
 
-	double operator ()(const T &lhs, const T &rhs) const {
+	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
@@ -84,18 +95,17 @@ struct OverlapDistance : DistanceFunction<T> {
 	}
 };
 
-template<typename T>
-struct WMinkowskiDistance : DistanceFunction<T> {
-	WMinkowskiDistance(int power, const T &weights): power(power), weights(weights) {}
+struct WMinkowskiDistance : DistanceFunction<VectorXf> {
+	WMinkowskiDistance(int power, const VectorXf &weights): power(power), weights(weights) {}
 
-	double operator ()(const T &lhs, const T &rhs) const {
+	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}
 
 		double distance = 0;
-		T delta = rhs - lhs;
+		VectorXf delta = rhs - lhs;
 
 		for (size_t i = 0; i < N; ++i) {
 			distance += weights(i) * fastpow(fabs(delta[i]), power);
@@ -105,7 +115,7 @@ struct WMinkowskiDistance : DistanceFunction<T> {
 	}
 
 	int power;
-	T weights;
+	VectorXf weights;
 };
 
 struct MahalanobisDistance : DistanceFunction<VectorXf> {
