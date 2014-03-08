@@ -90,7 +90,6 @@ int main() {
 					cout << "Score: " << accuracyScore(subtestY, prediction) << "\n";
 					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;
 					cout << endl;
-					return 0;
 				}
 			}
 		}
