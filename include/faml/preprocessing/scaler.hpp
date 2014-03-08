@@ -114,6 +114,27 @@ public:
 
 };
 
+class PowerAmplifyScaler : public Scaler<Eigen::VectorXf> {
+	typedef Eigen::VectorXf DataType;
+public:
+	PowerAmplifyScaler(double power): power(power) {}
+	virtual ~PowerAmplifyScaler() {}
+
+	void train(const Table<DataType> &samples) {
+	}
+
+	DataType operator () (const DataType &sample) const {
+		return sample.array().pow(power).matrix();
+	}
+
+	std::string toString() const {
+		return "PowerAmplifyScaler, power = " + std::to_string(power);
+	}
+
+private:
+	double power;
+};
+
 } // namespace faml
 
 #endif // SCALER_HPP
