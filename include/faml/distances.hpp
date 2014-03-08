@@ -31,7 +31,13 @@ struct MinkowskiDistance : DistanceFunction<T> {
 			throw std::invalid_argument("Arguments should have same length");
 		}
 
-		double distance = (rhs - lhs).cwiseAbs().array().pow(power).sum();
+		double distance = 0;
+		T delta = rhs - lhs;
+
+		for (size_t i = 0; i < N; ++i) {
+			distance += fastpow(fabs(delta[i]), power);
+		}
+
 		return pow(distance, 1.0 / power);
 	}
 
@@ -88,13 +94,12 @@ struct WMinkowskiDistance : DistanceFunction<T> {
 			throw std::invalid_argument("Arguments should have same length");
 		}
 
-		double distance = (weights.array() * (rhs - lhs).cwiseAbs().array().pow(power)).sum();
+		double distance = 0;
+		T delta = rhs - lhs;
 
-//		double distance = 0;
-
-//		for (size_t i = 0; i < N; ++i) {
-//			distance += weights(i) * fastpow(fabs(rhs[i] - lhs[i]), power);
-//		}
+		for (size_t i = 0; i < N; ++i) {
+			distance += weights(i) * fastpow(fabs(delta[i]), power);
+		}
 
 		return pow(distance, 1.0 / power);
 	}
