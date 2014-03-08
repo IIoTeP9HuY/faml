@@ -315,20 +315,20 @@ int main(int argc, char **argv) {
 	Table< std::vector<std::string> > trainLabelsString;
 	std::tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"Number"});
 
-	Table<sampleType> trainSamples(trainSamplesString.cast<sampleType>(
-								 [](const std::vector<std::string> &sample) {
-										sampleType result(sample.size());
-										for (size_t i = 0; i < sample.size(); ++i)
-											result[i] = std::atof(sample[i].c_str());
-										return result;
+	Table<sampleType> trainSamples(trainSamplesString.castByElement<sampleType>(
+								 [](const std::string &sample) {
+										return std::stof(sample);
 									}
 								 ));
 
-	Table<labelType> trainLabels(trainLabelsString.cast<labelType>(
+	Table<labelType> trainLabels(trainLabelsString.cast(
 								 [](const std::vector<std::string> &sample) {
-										return labelType(std::atol(sample[0].c_str()));
+										return labelType(std::stod(sample[0]));
 									}
 								 ));
+
+	trainSamplesString.clear();
+	trainLabelsString.clear();
 
 	Table<sampleType> trainSamplesTrain(trainSamples.getColumnsNames());
 	Table<labelType> trainLabelsTrain(trainLabels.getColumnsNames());
