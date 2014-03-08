@@ -23,8 +23,8 @@ std::vector<std::string> readCSVHeader(std::ifstream &inputStream) {
 	return header;
 }
 
-template<typename RowType>
-Table<RowType> readCSV(const std::string &filename) {
+Table<std::vector<std::string>> readCSV(const std::string &filename) {
+	typedef std::vector<std::string>> RowType;
 	std::ifstream inputStream(filename);
 	Table<RowType> table(readCSVHeader(inputStream));
 	size_t headerLength = table.columnsNumber();
@@ -38,13 +38,11 @@ Table<RowType> readCSV(const std::string &filename) {
 		}
 
 		std::istringstream ss(line);
-		std::string token;
 
 		RowType data(headerLength);
 
 		for (int i = 0; i < headerLength; ++i) {
-			std::getline(ss, token, ',');
-			data[i] = std::stod(token);
+			std::getline(ss, data[i], ',');
 		}
 
 		table.addRow(data);
