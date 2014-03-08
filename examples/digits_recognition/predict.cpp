@@ -11,6 +11,7 @@
 #include "faml/io.hpp"
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
+#include "faml/quality/classification.hpp"
 
 using namespace std;
 using namespace faml;
@@ -45,56 +46,6 @@ void trainTestSplit(const Table<DataType> &samples, const Table<LabelType> &labe
 	}
 }
 
-struct PredictionStatistics {
-	PredictionStatistics() {
-		accuracy = 0.0;
-	}
-
-	double accuracy;
-
-};
-
-template<typename LabelType>
-struct ConfustionMatrix {
-	ConfustionMatrix(const std::vector<LabelType> &labels): labels(labels) {
-	}
-
-	void printConfusionMatrix() {
-		std::cout << "  ";
-		for (const LabelType &label : labels) {
-			std::cout << std::setw(4) << label << " ";
-		}
-		std::cout << std::endl;
-
-		for (const LabelType &firstLabel : labels) {
-			std::cout << firstLabel << " ";
-			for (const LabelType &secondLabel : labels) {
-				std::cout << std::setw(4) << confusionMatrix[firstLabel][secondLabel] << " ";
-			}
-			std::cout << endl;
-		}
-	}
-
-	std::vector<LabelType> labels;
-	std::unordered_map< LabelType, std::unordered_map<LabelType, size_t> > confusionMatrix;
-};
-
-template<typename LabelType>
-PredictionStatistics calculatePredictionStatistics(const Table<LabelType> &realLabels,
-												   const Table<LabelType> &predictedLabels) {
-	PredictionStatistics statistics;
-	int matches = 0;
-	size_t N = realLabels.rowsNumber();
-	assert(N == predictedLabels.rowsNumber());
-
-	for (size_t i = 0; i < N; ++i) {
-		if (realLabels[i] == predictedLabels[i]) {
-			++matches;
-		}
-	}
-	statistics.accuracy = matches * 1.0 / N;
-	return statistics;
-}
 
 /*
 template<typename DataType, typename LabelType>
@@ -233,31 +184,30 @@ matrix<double> findOptimalWeights(const std::vector<sample_type> &samples,
 }
 */
 
-template<typename DataType>
-MatrixXf buildInverseCovarianceMatrix(const Table<DataType> &samples) {
-	size_t featuresDimension = samples.columnsNumber();
+//MatrixXf buildInverseCovarianceMatrix(const Table<VectorXf> &samples) {
+//	size_t featuresDimension = samples.columnsNumber();
 
-	std::cerr << "Features dimennsion: " << featuresDimension << std::endl;
+//	std::cerr << "Features dimennsion: " << featuresDimension << std::endl;
 
-	MatrixXf samplesMatrix(samples.size(), featuresDimension);
-	for (size_t i = 0; i < samples.size(); ++i) {
-		samplesMatrix(i) = samples[i];
-	}
+//	MatrixXf samplesMatrix(samples.rowsNumber(), featuresDimension);
+//	for (size_t i = 0; i < samples.rowsNumber(); ++i) {
+//		samplesMatrix(i) = samples[i];
+//	}
 
-	MatrixXf means = samplesMatrix.colwise().sum();
-	for (size_t i = 0; i < featuresDimension; ++i) {
-		samplesMatrix.col(i) -= means(i);
-	}
+//	MatrixXf means = samplesMatrix.colwise().sum();
+//	for (size_t i = 0; i < featuresDimension; ++i) {
+//		samplesMatrix.col(i) -= means(i);
+//	}
 
-	MatrixXf covarianceMatrix(featuresDimension, featuresDimension);
-	for (size_t i = 0; i < featuresDimension; ++i) {
-		for (size_t j = 0; j < featuresDimension; ++j) {
-			covarianceMatrix(i, j) = samplesMatrix.col(i).transpose() * samplesMatrix.col(j);
-		}
-	}
+//	MatrixXf covarianceMatrix(featuresDimension, featuresDimension);
+//	for (size_t i = 0; i < featuresDimension; ++i) {
+//		for (size_t j = 0; j < featuresDimension; ++j) {
+//			covarianceMatrix(i, j) = samplesMatrix.col(i).transpose() * samplesMatrix.col(j);
+//		}
+//	}
 
-	return covarianceMatrix.inverse();
-}
+//	return covarianceMatrix.inverse();
+//}
 
 //void printPrediction(const std::string &filename, const std::vector<label>& predictions) {
 //	std::ofstream outputStream(filename);
@@ -293,7 +243,7 @@ private:
 };
 
 typedef VectorXf sampleType;
-typedef size_t labelType;
+typedef unsigned long labelType;
 
 int main(int argc, char **argv) {
 	Timer predictTimer("predict");
@@ -323,7 +273,7 @@ int main(int argc, char **argv) {
 
 	Table<labelType> trainLabels(trainLabelsString.cast(
 								 [](const std::vector<std::string> &sample) {
-										return labelType(std::stod(sample[0]));
+										return std::stoul(sample[0]);
 									}
 								 ));
 
@@ -353,7 +303,7 @@ int main(int argc, char **argv) {
 
 	int power = 2;
 
-	MinkowskiDistance<sampleType> minkowskiDistance(power);
+	MinkowskiDistance minkowskiDistance(power);
     double gamma = 4.0;
 	RBFKernel rbfKernel(gamma);
 	InverseKernel inverseKernel();
@@ -369,11 +319,11 @@ int main(int argc, char **argv) {
     // weights = findOptimalWeights(trainSamplesTrain, trainLabelsTrain, 0.1, power);
     // std::cerr << weights << std::endl;
 
-	WMinkowskiDistance<sampleType> wminkowskiDistance(power, weights);
+	WMinkowskiDistance wminkowskiDistance(power, weights);
 	// MulticlassWMinkowskiDistance multiclassWminkowskiDistance(power, multiclassWeights);
 	// MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
-	CosineDistance<sampleType> cosineDistance;
-	OverlapDistance<sampleType> overlapDistance;
+	CosineDistance cosineDistance;
+	OverlapDistance overlapDistance;
 
 	prepareTimer.stop();
 
@@ -384,8 +334,8 @@ int main(int argc, char **argv) {
 			classifier.train(trainSamplesTrain, trainLabelsTrain);
 			Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTest);
 
-			PredictionStatistics statistics = calculatePredictionStatistics(trainLabelsTest, trainLabelsTestPrediction);
-			std::cout << "K: " << K << " Accuracy: " << statistics.accuracy << std::endl;
+			double accuracy = accuracyScore(trainLabelsTest, trainLabelsTestPrediction);
+			std::cout << "K: " << K << " Accuracy: " << accuracy << std::endl;
 		}
 	}
 
