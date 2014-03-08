@@ -4,6 +4,7 @@
 #include <limits>
 #include <iomanip>
 #include <tuple>
+#include <memory>
 
 #include <eigen3/Eigen/LU>
 
@@ -22,8 +23,7 @@ using namespace Eigen;
 
 const bool VERBOSE = false;
 
-std::random_device rd;
-std::mt19937 gen(rd());
+std::mt19937 gen;
 
 double uniformUnitRandom() {
 	std::uniform_real_distribution<> uniformGenerator(0, 1);
@@ -226,14 +226,10 @@ typedef VectorXf sampleType;
 typedef unsigned long labelType;
 
 int main(int argc, char **argv) {
-	Timer predictTimer("predict");
-
 	if(argc < 2) {
 		cerr << "usage: " << argv[0] << " train [test]" << endl;
 		exit(EXIT_FAILURE);
 	}
-
-	Timer prepareTimer("prepare");
 
 	std::string trainsetFilename(argv[1]);
 	Table< std::vector<std::string> > dataset(readCSV(trainsetFilename));
@@ -267,50 +263,50 @@ int main(int argc, char **argv) {
 				trainSamplesTest, trainLabelsTest,
 				0.1);
 
-	NormalScaler normalScaler;
-	normalScaler.train(trainSamplesTrain);
+	std::vector<std::unique_ptr<Scaler<sampleType>>> scalers;
+	scalers.emplace_back(new DummyScaler<sampleType>());
+	scalers.emplace_back(new NormalScaler());
+	scalers.emplace_back(new MinMaxScaler(trainSamples.columnsNumber(), 0, 1));
 
-	for (auto &sample : trainSamplesTrain) {
-		sample = normalScaler(sample);
+	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	distances.emplace_back(new EuclidianDistance());
+	distances.emplace_back(new MinkowskiDistance(3.0));
+	distances.emplace_back(new MinkowskiDistance(5.0));
+	distances.emplace_back(new CosineDistance());
+	distances.emplace_back(new OverlapDistance());
+
+	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	kernels.emplace_back(new RBFKernel(1.0));
+	kernels.emplace_back(new RBFKernel(4.0));
+	kernels.emplace_back(new InverseKernel());
+	kernels.emplace_back(new TriangleKernel());
+	kernels.emplace_back(new QuarticKernel());
+	kernels.emplace_back(new EpanechnikovKernel());
+	kernels.emplace_back(new DiscreteKernel());
+
+	for (const auto &scaler : scalers) {
+		Table<sampleType> trainSamplesTrainScaled = (*scaler)(trainSamplesTrain);
+		Table<sampleType> trainSamplesTestScaled = (*scaler)(trainSamplesTest);
+
+		for (const auto &distance : distances) {
+			for (const auto &kernel : kernels) {
+				for (size_t K = 1; K < 20; ++K) {
+					KNNClassifier<sampleType, labelType> classifier(K, *distance, *kernel);
+					classifier.train(trainSamplesTrainScaled, trainLabelsTrain);
+					Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTestScaled);
+
+					double accuracy = accuracyScore(trainLabelsTest, trainLabelsTestPrediction);
+					std::cout << "Accuracy: " << accuracy << std::endl;
+					std::cout << "(K: " << K << "; " << scaler->toString() << "; "
+							  << distance->toString() <<  "; " << kernel->toString() << ")" << std::endl << std::endl;
+				}
+			}
+		}
 	}
-
-	for (auto &sample : trainSamplesTest) {
-		sample = normalScaler(sample);
-	}
-
-	MatrixXf inverseCovarianceMatrix;
-//	inverseCovarianceMatrix = covarianceMatrix(trainSamplesTrain).inverse();
-
-	int power = 2;
-
-	MinkowskiDistance minkowskiDistance(power);
-	double gamma = 4.0;
-	RBFKernel rbfKernel(gamma);
-	InverseKernel inverseKernel();
-	TriangleKernel triangleKernel;
-	QuarticKernel quarticKernel;
-	EpanechnikovKernel epanechnikovKernel;
-	DiscreteKernel discreteKernel;
-
-	// removeOutliers(&trainSamplesTrain, &trainLabelsTrain, &minkowskiDistance, 0.001);
-	// removeOutliers(&trainSamples, &trainLabels, &minkowskiDistance, 0.001);
-
-	MatrixXf weights = VectorXf::Ones(trainSamples.columnsNumber());
-	// weights = findOptimalWeights(trainSamplesTrain, trainLabelsTrain, 0.1, power);
-	// std::cerr << weights << std::endl;
-
-	WMinkowskiDistance wminkowskiDistance(power, weights);
-	// MulticlassWMinkowskiDistance multiclassWminkowskiDistance(power, multiclassWeights);
-	MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
-	CosineDistance cosineDistance;
-	OverlapDistance overlapDistance;
-
-	prepareTimer.stop();
 
 	{
-		Timer knnRunsTimer("knn runs");
 		for (size_t K = 1; K < 20; ++K) {
-			KNNClassifier<sampleType, labelType> classifier(K, minkowskiDistance, quarticKernel);
+			KNNClassifier<sampleType, labelType> classifier(K, *distances[0], *kernels[0]);
 			classifier.train(trainSamplesTrain, trainLabelsTrain);
 			Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTest);
 
