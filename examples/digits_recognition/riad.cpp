@@ -17,7 +17,7 @@ using namespace faml;
 using namespace Eigen;
 
 const bool VERBOSE = false;
-
+/*
 int main(int argc, char **argv) {
 
 	NormalScaler normalScaler;
@@ -85,7 +85,32 @@ int main(int argc, char **argv) {
 
 //i	return 0;
 //}
+std::random_device rd;
+std::mt19937 gen(rd());
 
+double uniformUnitRandom() {
+	std::uniform_real_distribution<> uniformGenerator(0, 1);
+	return uniformGenerator(gen);
+}
+
+template<typename DataType, typename LabelType>
+void trainTestSplit(const Table<DataType> &samples, const Table<LabelType> &labels,
+					Table<DataType> &trainSamples, Table<LabelType> &trainLabels,
+					Table<DataType> &testSamples, Table<LabelType> &testLabels,
+					double testProportion) {
+
+	size_t N = samples.rowsNumber();
+
+	for (size_t i = 0; i < N; ++i) {
+		if (uniformUnitRandom() < testProportion) {
+			testSamples.addRow(samples[i]);
+			testLabels.addRow(labels[i]);
+		} else {
+			trainSamples.addRow(samples[i]);
+			trainLabels.addRow(labels[i]);
+		}
+	}
+}
 
 int main() {
 	auto testData = readCSV("mnist_small_train.csv");
@@ -106,16 +131,17 @@ int main() {
 		}
 	);
 
-	Table<SampleType> subtrainX(subtrainX.getColumnsNames());
-	Table<Label> subtrainY(subtrainY.getColumnsNames());
-	Table<SampleType> subTestX(subtrainX.getColumnsNames());
-	Table<Label> subTestY(subtrainY.getColumnsNames());
+	Table<SampleType> subtrainX(trainX.getColumnsNames());
+	Table<Label> subtrainY(trainY.getColumnsNames());
+	Table<SampleType> subtestX(trainX.getColumnsNames());
+	Table<Label> subtestY(trainY.getColumnsNames());
 
-	trainTestSplit(trainX, trainY
+	trainTestSplit(trainX, trainY,
 				subtrainX, subtrainY,
 				subtestX, subtestY,
 				0.05);
-
-	vector<unique_ptr<Scaler>> scalers = 
+	Scaler<VectorXf>* scaler = new DummyScaler<VectorXf>();
+	cout << scaler->toString();
+//	vector<unique_ptr<Scaler>> scalers = 
 	return 0;
 }
