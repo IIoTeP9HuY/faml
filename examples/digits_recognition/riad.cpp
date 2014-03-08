@@ -13,6 +13,7 @@
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/cross_validation.hpp"
+#include "faml/quality/classification.hpp"
 
 using namespace std;
 using namespace faml;
@@ -43,7 +44,7 @@ int main() {
 
 	mt19937 gen(1993);
 
-	auto indicies = trainTestSplit(trainX.rowsNumber(), 0.05, gen);
+	auto indicies = trainTestSplit(trainX.rowsNumber(), (size_t)19000, gen);
 	auto subtrainX = trainX[indicies.first];
 	auto subtrainY = trainY[indicies.first];
 	auto subtestX = trainX[indicies.second];
@@ -58,10 +59,10 @@ int main() {
 	scalers.emplace_back(new MinMaxScaler(columns.size(), 0, 1));
 
 	std::vector<std::unique_ptr<KernelFunction>> kernels;
-	kernels.emplace_back(new InverseKernel());
-	kernels.emplace_back(new DiscreteKernel());
-	kernels.emplace_back(new RBFKernel(1.0));
 	kernels.emplace_back(new QuarticKernel());
+	kernels.emplace_back(new DiscreteKernel());
+	kernels.emplace_back(new InverseKernel());
+	kernels.emplace_back(new RBFKernel(1.0));
 	kernels.emplace_back(new EpanechnikovKernel());
 
 	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
@@ -70,11 +71,29 @@ int main() {
 	distances.emplace_back(new MinkowskiDistance(5));
 	distances.emplace_back(new CosineDistance());
 	distances.emplace_back(new OverlapDistance());
-	for(const auto& df: distances) {
-		cout << df->toString() << endl;
-	}
-	//distances.emplace_back(new MahalanobisDistance());
 
+	for(const auto& scaler: scalers) {
+		scaler->train(subtrainX);
+		auto lambda = [&scaler](const VectorXf& row) {
+			return (*scaler)(row);
+		};
+		auto scaledX = subtrainX.cast(lambda);
+		auto scaledTest = subtestX.cast(lambda);
+		for(size_t k = 8; k <= 10; ++k) {
+			for(const auto& distance: distances) {
+				for(const auto& kernel: kernels) {
+					clock_t start = clock();
+					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
+					knn.train(scaledX, subtrainY);
+					auto prediction = knn.predict(scaledTest);
+					cout << scaler->toString() << ' ' << distance->toString() << ' ' << kernel->toString() << "\n";
+					cout << "Score: " << accuracyScore(subtestY, prediction) << "\n";
+					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;
+					cout << endl;
+				}
+			}
+		}
+	}
 
 	return 0;
 }
