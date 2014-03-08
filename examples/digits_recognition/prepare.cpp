@@ -21,12 +21,11 @@ double distance(double x1, double y1, double x2, double y2)
 	return sqrt(double((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
 }
 
+const int dh[4] = {1, 0, -1, 0};
+const int dw[4] = {0, 1, 0, -1};
 
 struct TrainObject
 {
-	const int dh[4] = {1, 0, -1, 0};
-	const int dw[4] = {0, 1, 0, -1};
-
 	TrainObject() {}
 	TrainObject(const Image& image, size_t classId = -1): image(image), 
 	                                                      classId(classId) {}
