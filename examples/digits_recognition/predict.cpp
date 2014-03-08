@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <tuple>
 
+#include <eigen3/Eigen/LU>
+
 #include "faml/data.hpp"
 #include "faml/kernels.hpp"
 #include "faml/distances.hpp"
@@ -12,6 +14,7 @@
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/quality/classification.hpp"
+#include "faml/statistics/statistics.hpp"
 
 using namespace std;
 using namespace faml;
@@ -183,29 +186,6 @@ matrix<double> findOptimalWeights(const std::vector<sample_type> &samples,
 	return -(alpha * positive - (1 - alpha) * negative);
 }
 */
-
-//MatrixXf buildInverseCovarianceMatrix(const Table<VectorXf> &samples) {
-//	size_t featuresDimension = samples.columnsNumber();
-
-//	std::cerr << "Features dimennsion: " << featuresDimension << std::endl;
-
-//	MatrixXf samplesMatrix(samples.rowsNumber(), featuresDimension);
-//	for (size_t i = 0; i < samples.rowsNumber(); ++i) {
-//		samplesMatrix(i) = samples[i];
-//	}
-
-//	MatrixXf means = samplesMatrix.colwise().sum();
-//	for (size_t i = 0; i < featuresDimension; ++i) {
-//		samplesMatrix.col(i) -= means(i);
-//	}
-
-//	MatrixXf covarianceMatrix(featuresDimension, featuresDimension);
-//	for (size_t i = 0; i < featuresDimension; ++i) {
-//		for (size_t j = 0; j < featuresDimension; ++j) {
-//			covarianceMatrix(i, j) = samplesMatrix.col(i).transpose() * samplesMatrix.col(j);
-//		}
-//	}
-
 //	return covarianceMatrix.inverse();
 //}
 
@@ -258,12 +238,9 @@ int main(int argc, char **argv) {
 	std::string trainsetFilename(argv[1]);
 	Table< std::vector<std::string> > dataset(readCSV(trainsetFilename));
 
-//	MatrixXf inverseCovarianceMatrix;
-//	inverseCovarianceMatrix = buildInverseCovarianceMatrix(trainSamples);
-
 	Table< std::vector<std::string> > trainSamplesString;
 	Table< std::vector<std::string> > trainLabelsString;
-	std::tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"Number"});
+	std::tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"label"});
 
 	Table<sampleType> trainSamples(trainSamplesString.castByElement<sampleType>(
 								 [](const std::string &sample) {
@@ -301,27 +278,30 @@ int main(int argc, char **argv) {
 		sample = normalScaler(sample);
 	}
 
+	MatrixXf inverseCovarianceMatrix;
+//	inverseCovarianceMatrix = covarianceMatrix(trainSamplesTrain).inverse();
+
 	int power = 2;
 
 	MinkowskiDistance minkowskiDistance(power);
-    double gamma = 4.0;
+	double gamma = 4.0;
 	RBFKernel rbfKernel(gamma);
 	InverseKernel inverseKernel();
-    TriangleKernel triangleKernel;
-    QuarticKernel quarticKernel;
-    EpanechnikovKernel epanechnikovKernel;
-    DiscreteKernel discreteKernel;
+	TriangleKernel triangleKernel;
+	QuarticKernel quarticKernel;
+	EpanechnikovKernel epanechnikovKernel;
+	DiscreteKernel discreteKernel;
 
-    // removeOutliers(&trainSamplesTrain, &trainLabelsTrain, &minkowskiDistance, 0.001);
-    // removeOutliers(&trainSamples, &trainLabels, &minkowskiDistance, 0.001);
+	// removeOutliers(&trainSamplesTrain, &trainLabelsTrain, &minkowskiDistance, 0.001);
+	// removeOutliers(&trainSamples, &trainLabels, &minkowskiDistance, 0.001);
 
 	MatrixXf weights = VectorXf::Ones(trainSamples.columnsNumber());
-    // weights = findOptimalWeights(trainSamplesTrain, trainLabelsTrain, 0.1, power);
-    // std::cerr << weights << std::endl;
+	// weights = findOptimalWeights(trainSamplesTrain, trainLabelsTrain, 0.1, power);
+	// std::cerr << weights << std::endl;
 
 	WMinkowskiDistance wminkowskiDistance(power, weights);
 	// MulticlassWMinkowskiDistance multiclassWminkowskiDistance(power, multiclassWeights);
-	// MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
+	 MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
 	CosineDistance cosineDistance;
 	OverlapDistance overlapDistance;
 

@@ -71,6 +71,11 @@ public:
 	virtual ~MinMaxScaler() {}
 
 	void train(const Table<DataType> &samples) {
+		if (!samples.empty()) {
+			minValues = samples[0];
+			maxValues = samples[0];
+		}
+
 		for (const auto &sample : samples) {
 			minValues = minValues.cwiseMin(sample);
 			maxValues = maxValues.cwiseMax(sample);
