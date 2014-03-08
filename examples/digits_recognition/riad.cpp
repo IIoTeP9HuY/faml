@@ -79,7 +79,7 @@ int main() {
 		};
 		auto scaledX = subtrainX.cast(lambda);
 		auto scaledTest = subtestX.cast(lambda);
-		for(size_t k = 8; k <= 20; ++k) {
+		for(size_t k = 8; k <= 10; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
 					clock_t start = clock();
@@ -90,6 +90,7 @@ int main() {
 					cout << "Score: " << accuracyScore(subtestY, prediction) << "\n";
 					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;
 					cout << endl;
+					return 0;
 				}
 			}
 		}
