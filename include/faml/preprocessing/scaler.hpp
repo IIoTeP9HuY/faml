@@ -64,7 +64,11 @@ class MinMaxScaler : public Scaler<Eigen::VectorXf> {
 public:
 	MinMaxScaler(const DataType &lowerBound, const DataType &upperBound):
 		lowerBound(lowerBound), upperBound(upperBound) {}
-	~MinMaxScaler() {}
+
+	MinMaxScaler(size_t n, double lowerBound, double upperBound): lowerBound(VectorXf::Ones(n) * lowerBound),
+	                                                              upperBound(VectorXf::Ones(n) * upperBound){
+	}
+	virtual ~MinMaxScaler() {}
 
 	void train(const Table<DataType> &samples) {
 		for (const auto &sample : samples) {

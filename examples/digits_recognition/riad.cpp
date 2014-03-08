@@ -4,6 +4,7 @@
 #include <limits>
 #include <iomanip>
 #include <tuple>
+#include <memory>
 
 #include "faml/data.hpp"
 #include "faml/kernels.hpp"
@@ -140,8 +141,11 @@ int main() {
 				subtrainX, subtrainY,
 				subtestX, subtestY,
 				0.05);
-	Scaler<VectorXf>* scaler = new DummyScaler<VectorXf>();
-	cout << scaler->toString();
+	std::vector<std::unique_ptr<Scaler<VectorXf>>> scalers;
+	scalers.emplace_back(new DummyScaler<VectorXf>());
+	scalers.emplace_back(new NormalScaler());
+	scalers.emplace_back(new MinMaxScaler(28*28, 0, 1));
+
 //	vector<unique_ptr<Scaler>> scalers = 
 	return 0;
 }
