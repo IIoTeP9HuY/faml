@@ -306,16 +306,28 @@ int main(int argc, char **argv) {
 	Timer prepareTimer("prepare");
 
 	std::string trainsetFilename(argv[1]);
-	Table<sampleType> dataset(readCSV<sampleType>(trainsetFilename));
+	Table< std::vector<std::string> > dataset(readCSV(trainsetFilename));
 
 //	MatrixXf inverseCovarianceMatrix;
 //	inverseCovarianceMatrix = buildInverseCovarianceMatrix(trainSamples);
 
-	Table<sampleType> trainSamples;
-	Table<sampleType> trainLabelsRaw;
-	std::tie(trainSamples, trainLabelsRaw) = dataset.splitOnColumns({"Number"});
-	Table<labelType> trainLabels(trainLabelsRaw.cast<labelType>(
-								 [](const sampleType &sample) { return labelType(sample(0)); }
+	Table< std::vector<std::string> > trainSamplesString;
+	Table< std::vector<std::string> > trainLabelsString;
+	std::tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"Number"});
+
+	Table<sampleType> trainSamples(trainSamplesString.cast<sampleType>(
+								 [](const std::vector<std::string> &sample) {
+										sampleType result(sample.size());
+										for (size_t i = 0; i < sample.size(); ++i)
+											result[i] = std::atof(sample[i].c_str());
+										return result;
+									}
+								 ));
+
+	Table<labelType> trainLabels(trainLabelsString.cast<labelType>(
+								 [](const std::vector<std::string> &sample) {
+										return labelType(std::atol(sample[0].c_str()));
+									}
 								 ));
 
 	Table<sampleType> trainSamplesTrain(trainSamples.getColumnsNames());
@@ -344,7 +356,7 @@ int main(int argc, char **argv) {
 	MinkowskiDistance<sampleType> minkowskiDistance(power);
     double gamma = 4.0;
 	RBFKernel rbfKernel(gamma);
-	InverseKernel inverseKernel(1.0);
+	InverseKernel inverseKernel();
     TriangleKernel triangleKernel;
     QuarticKernel quarticKernel;
     EpanechnikovKernel epanechnikovKernel;

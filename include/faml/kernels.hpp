@@ -14,10 +14,8 @@ struct KernelFunction {
 
 struct InverseKernel : public KernelFunction {
 	double operator ()(const double dist) const {
-		return lambda / dist;
+		return 1.0 / dist;
 	}
-
-	double 1.0;
 };
 
 struct DiscreteKernel : public KernelFunction {
