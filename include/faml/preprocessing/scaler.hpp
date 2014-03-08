@@ -40,8 +40,7 @@ public:
 			}
 		}
 		for (size_t i = 0; i < F; ++i) {
-			// FIX THIS
-			deviation[i] = 1.0 / sqrt(deviation[i]);
+			deviation[i] = sqrt(deviation[i]);
 		}
 	}
 
@@ -52,6 +51,29 @@ public:
 private:
 	DataType mean;
 	DataType deviation;
+};
+
+class MinMaxScaler : public Scaler<Eigen::VectorXf> {
+	typedef Eigen::VectorXf DataType;
+public:
+	MinMaxScaler(const DataType &lowerBound, const DataType &upperBound):
+		lowerBound(lowerBound), upperBound(upperBound) {}
+	~MinMaxScaler() {}
+
+	void train(const Table<DataType> &samples) {
+		for (const auto &sample : samples) {
+			minValues = minValues.cwiseMin(sample);
+			maxValues = maxValues.cwiseMax(sample);
+		}
+	}
+
+	DataType operator () (const DataType &sample) const {
+		return (sample - minValues).cwiseQuotient(maxValues - minValues).cwiseProduct(upperBound - lowerBound) + lowerBound;
+	}
+
+private:
+	DataType lowerBound, upperBound;
+	DataType minValues, maxValues;
 };
 
 } // namespace faml
