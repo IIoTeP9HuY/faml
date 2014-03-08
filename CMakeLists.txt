@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(faml CXX)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/foreign/Eigen)
+include_directories(${PROJECT_SOURCE_DIR}/foreign)
 add_definitions(-O2 --std=c++0x)
 add_definitions(-fopenmp)
 
