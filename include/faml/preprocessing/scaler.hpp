@@ -76,6 +76,13 @@ private:
 	DataType minValues, maxValues;
 };
 
+template <typename T>
+class DummyScaler : public Scaler<T> {
+	virtual ~DummyScaler();
+	virtual void train(const Table<T>&) {}
+	virtual void () (const T&) const {}
+}
+
 } // namespace faml
 
 #endif // SCALER_HPP
