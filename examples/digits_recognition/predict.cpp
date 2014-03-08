@@ -282,7 +282,7 @@ public:
 	void stop() {
 		size_t stopTime = clock();
 		double deltaMs = (stopTime - startTime) * 1.0 / CLOCKS_PER_SEC;
-		std::cerr << name << " elapsed: " << deltaMs << " ms";
+		std::cerr << name << " elapsed: " << deltaMs << " ms" << std::endl;
 		stopped = true;
 	}
 
