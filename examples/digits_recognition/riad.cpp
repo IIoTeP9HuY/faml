@@ -12,37 +12,11 @@
 #include "faml/io.hpp"
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
+#include "faml/cross_validation.hpp"
 
 using namespace std;
 using namespace faml;
 using namespace Eigen;
-
-std::random_device rd;
-std::mt19937 gen(rd());
-
-double uniformUnitRandom() {
-	std::uniform_real_distribution<> uniformGenerator(0, 1);
-	return uniformGenerator(gen);
-}
-
-template<typename DataType, typename LabelType>
-void trainTestSplit(const Table<DataType> &samples, const Table<LabelType> &labels,
-					Table<DataType> &trainSamples, Table<LabelType> &trainLabels,
-					Table<DataType> &testSamples, Table<LabelType> &testLabels,
-					double testProportion) {
-
-	size_t N = samples.rowsNumber();
-
-	for (size_t i = 0; i < N; ++i) {
-		if (uniformUnitRandom() < testProportion) {
-			testSamples.addRow(samples[i]);
-			testLabels.addRow(labels[i]);
-		} else {
-			trainSamples.addRow(samples[i]);
-			trainLabels.addRow(labels[i]);
-		}
-	}
-}
 
 int main() {
 	auto testData = readCSV("mnist_small_train.csv");
@@ -67,15 +41,13 @@ int main() {
 
 	auto columns = trainX.getColumnsNames();
 
-	Table<SampleType> subtrainX(columns);
-	Table<Label> subtrainY(trainY.getColumnsNames());
-	Table<SampleType> subtestX(columns);
-	Table<Label> subtestY(trainY.getColumnsNames());
+	mt19937 gen(1993);
 
-	trainTestSplit(trainX, trainY,
-				subtrainX, subtrainY,
-				subtestX, subtestY,
-				0.05);
+	auto indicies = trainTestSplit(trainX.rowsNumber(), 0.05, gen);
+	auto subtrainX = trainX[indicies.first];
+	auto subtrainY = trainY[indicies.first];
+	auto subtestX = trainX[indicies.second];
+	auto subtestY = trainY[indicies.second];
 
 	trainX.clear();
 	trainY.clear();
