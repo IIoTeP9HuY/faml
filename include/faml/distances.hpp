@@ -3,6 +3,7 @@
 
 #include <eigen3/Eigen/Core>
 #include <stdexcept>
+#include <string>
 
 namespace faml {
 
@@ -18,12 +19,12 @@ inline double fastpow(double x, int power) {
 
 template<typename T>
 struct DistanceFunction {
-	virtual double operator ()(const T &lhs, const T &rhs) const {}
+	virtual double operator ()(const T &lhs, const T &rhs) const = 0;
+	virtual std::string toString() const = 0;
+	virtual ~DistanceFunction(){}
 };
 
 struct EuclidianDistance : DistanceFunction<VectorXf> {
-	EuclidianDistance() {}
-
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
@@ -33,6 +34,12 @@ struct EuclidianDistance : DistanceFunction<VectorXf> {
 		double distance = (rhs - lhs).norm();
 		return distance;
 	}
+
+	std::string toString() const {
+		return "EuclidianDistance";
+	}
+
+	virtual ~EuclidianDistance() {};
 };
 
 struct MinkowskiDistance : DistanceFunction<VectorXf> {
@@ -54,6 +61,12 @@ struct MinkowskiDistance : DistanceFunction<VectorXf> {
 		return pow(distance, 1.0 / power);
 	}
 
+	std::string toString() const {
+		return "MinkowskiDistance, p = " + std::to_string(power);
+	}
+
+	virtual ~MinkowskiDistance() {}
+private:
 	size_t power;
 };
 
@@ -74,11 +87,15 @@ struct CosineDistance : DistanceFunction<VectorXf> {
 
 		return distance;
 	}
+
+	std::string toString() const {
+		return "CosineDistance";
+	}
+
+	virtual ~CosineDistance() {}
 };
 
 struct OverlapDistance : DistanceFunction<VectorXf> {
-	OverlapDistance() {}
-
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
 		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
@@ -93,6 +110,12 @@ struct OverlapDistance : DistanceFunction<VectorXf> {
 
 		return distance;
 	}
+
+	std::string toString() const {
+		return "OverlapDistance";
+	}
+	
+	virtual ~OverlapDistance() {}
 };
 
 struct WMinkowskiDistance : DistanceFunction<VectorXf> {
@@ -114,8 +137,14 @@ struct WMinkowskiDistance : DistanceFunction<VectorXf> {
 		return pow(distance, 1.0 / power);
 	}
 
+	std::string toString() const {
+		return "WMinkowskiDistance, p = " + std::to_string(power);
+	}
+private:
 	int power;
 	VectorXf weights;
+public:
+	virtual ~WMinkowskiDistance() {}
 };
 
 struct MahalanobisDistance : DistanceFunction<VectorXf> {

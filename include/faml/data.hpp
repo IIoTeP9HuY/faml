@@ -33,6 +33,13 @@ public:
 		data.resize(size);
 	}
 
+	Table<RowType> operator [] (std::vector<size_t> indicies) {
+		Table<RowType> result(columnsNames);
+		for(auto index: indicies)
+			result.addRow(data[index]);
+		return result;
+	}
+
 	RowType &operator [] (size_t index) {
 		return data[index];
 	}
