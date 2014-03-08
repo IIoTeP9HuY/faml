@@ -69,6 +69,11 @@ public:
 		return rowsNumber() == 0;
 	}
 
+	void clear() {
+		DataContainer empty;
+		data.swap(empty);
+	}
+
 	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
 	Table<NewRowType> cast(FunctionType castFunction) const {
 		Table<NewRowType> castedTable(columnsNames);
