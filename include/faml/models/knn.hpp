@@ -52,7 +52,6 @@ public:
 	}
 
 	Table<LabelType> predict(const TableView<DataType> &samples) {
-		Table<LabelType> labels(baseLabels.columnsNames());
 		std::vector<LabelType> predictions(samples.rowsNumber());
 
 		#pragma omp parallel for
@@ -60,10 +59,9 @@ public:
 			predictions[i] = predict(samples[i]);
 		}
 
-		for (auto &prediction : predictions) {
-			labels.addRow(std::move(prediction));
-		}
-		return labels;
+		return Table<LabelType> (baseLabels.columnsNames(),
+								 std::make_move_iterator(predictions.begin()),
+								 std::make_move_iterator(predictions.end()));
 	}
 
 private:

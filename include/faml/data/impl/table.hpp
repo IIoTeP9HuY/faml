@@ -48,6 +48,10 @@ public:
 	Table(const std::vector<std::string> &columnsNames): columnsNames_(columnsNames) {
 	}
 
+	template<typename It>
+	Table(const std::vector<std::string> &columnsNames, It begin, It end): data(begin, end), columnsNames_(columnsNames) {
+	}
+
 	void addRow(const RowType &sample) {
 		data.push_back(sample);
 	}
