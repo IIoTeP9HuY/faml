@@ -4,12 +4,12 @@
 #include <stdexcept>
 #include <set>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 
 namespace faml {
 
 template<typename LabelType>
-size_t countCorrectPredictions(const Table<LabelType> &realLabels, const Table<LabelType> &predictedLabels) {
+size_t countCorrectPredictions(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
 	if (realLabels.rowsNumber() != predictedLabels.rowsNumber()) {
 		throw std::invalid_argument("Arguments should have same length");
 	}
@@ -22,7 +22,7 @@ size_t countCorrectPredictions(const Table<LabelType> &realLabels, const Table<L
 }
 
 template<typename LabelType>
-double accuracyScore(const Table<LabelType> &realLabels, const Table<LabelType> &predictedLabels) {
+double accuracyScore(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
 	size_t correctPredictionsNumber = countCorrectPredictions(realLabels, predictedLabels);
 
 	if (realLabels.rowsNumber() == 0) {
@@ -67,8 +67,8 @@ std::ostream operator << (std::ostream &os, const ConfusionMatrix<LabelType> &co
 }
 
 template<typename LabelType>
-ConfusionMatrix<LabelType> confusionMatrix(const Table<LabelType> &realLabels,
-											const Table<LabelType> &predictedLabels) {
+ConfusionMatrix<LabelType> confusionMatrix(const TableView<LabelType> &realLabels,
+											const TableView<LabelType> &predictedLabels) {
 	if (realLabels.rowsNumber() != predictedLabels.rowsNumber()) {
 		throw std::invalid_argument("Arguments should have same length");
 	}

@@ -3,7 +3,7 @@
 
 #include <eigen3/Eigen/Core>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 
 namespace faml {
 

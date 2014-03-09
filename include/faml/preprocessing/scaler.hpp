@@ -1,7 +1,7 @@
 #ifndef SCALER_HPP
 #define SCALER_HPP
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 #include "eigen3/Eigen/Core"
 
 namespace faml {
@@ -12,11 +12,11 @@ public:
 	Scaler() {}
 	virtual ~Scaler() {}
 
-	virtual void train(const Table<DataType> &samples) = 0;
+	virtual void train(const TableView<DataType> &samples) = 0;
 
 	virtual DataType operator () (const DataType &sample) const = 0;
 
-	virtual Table<DataType> operator () (const Table<DataType> &samples) {
+	virtual Table<DataType> operator () (const TableView<DataType> &samples) {
 		return samples.cast(
 					[&] (const DataType &sample) { return (*this)(sample); }
 		);
@@ -31,7 +31,7 @@ public:
 	NormalScaler() {}
 	~NormalScaler() {}
 
-	void train(const Table<DataType> &samples) {
+	void train(const TableView<DataType> &samples) {
 		size_t F = samples.columnsNumber();
 		mean = DataType(F);
 		deviation = DataType(F);
@@ -76,7 +76,7 @@ public:
 	}
 	virtual ~MinMaxScaler() {}
 
-	void train(const Table<DataType> &samples) {
+	void train(const TableView<DataType> &samples) {
 		if (!samples.empty()) {
 			minValues = samples[0];
 			maxValues = samples[0];
@@ -106,7 +106,7 @@ class DummyScaler : public Scaler<T> {
 public:
 	virtual ~DummyScaler() {}
 
-	virtual void train(const Table<T>&) {}
+	virtual void train(const TableView<T>&) {}
 	virtual T operator () (const T& sample) const { return sample; }
 	virtual std::string toString() const {
 		return "DummyScaler";
@@ -120,7 +120,7 @@ public:
 	PowerAmplifyScaler(double power): power(power) {}
 	virtual ~PowerAmplifyScaler() {}
 
-	void train(const Table<DataType> &samples) {
+	void train(const TableView<DataType> &samples) {
 	}
 
 	DataType operator () (const DataType &sample) const {
