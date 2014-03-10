@@ -12,7 +12,6 @@
 #include "faml/io.hpp"
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
-#include "faml/cross_validation.hpp"
 #include "faml/quality/classification.hpp"
 
 using namespace std;
