@@ -7,11 +7,12 @@
 
 #include "faml/data/table.hpp"
 #include "faml/distances.hpp"
+#include "faml/models/predictor.hpp"
 
 namespace faml {
 
 template<typename DataType, typename LabelType>
-class KNNClassifier {
+class KNNClassifier : public Predictor<DataType, LabelType> {
 public:
 	KNNClassifier(size_t K, const DistanceFunction<DataType> &dist, const KernelFunction &kernel): K(K), dist(dist), kernel(kernel) {
 		if (K == 0) {
@@ -64,6 +65,7 @@ public:
 								 std::make_move_iterator(predictions.end()));
 	}
 
+	virtual ~KNNClassifier() {}
 private:
 	static bool labelWeightPairComparator(const std::pair<LabelType, double> &lhs, const std::pair<LabelType, double> &rhs) {
 		return lhs.second < rhs.second;
