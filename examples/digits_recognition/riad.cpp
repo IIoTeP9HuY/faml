@@ -6,7 +6,7 @@
 #include <tuple>
 #include <memory>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 #include "faml/kernels.hpp"
 #include "faml/distances.hpp"
 #include "faml/io.hpp"
@@ -40,7 +40,7 @@ int main() {
 	trainXstr.clear();
 	trainYstr.clear();
 
-	auto columns = trainX.getColumnsNames();
+	auto columns = trainX.columnsNames();
 
 	mt19937 gen(1993);
 
@@ -49,9 +49,6 @@ int main() {
 	auto subtrainY = trainY[indicies.first];
 	auto subtestX = trainX[indicies.second];
 	auto subtestY = trainY[indicies.second];
-
-	trainX.clear();
-	trainY.clear();
 
 	std::vector<std::unique_ptr<Scaler<VectorXf>>> scalers;
 	scalers.emplace_back(new DummyScaler<VectorXf>());

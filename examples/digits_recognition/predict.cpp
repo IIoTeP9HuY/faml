@@ -4,10 +4,11 @@
 #include <limits>
 #include <iomanip>
 #include <tuple>
+#include <memory>
 
 #include <eigen3/Eigen/LU>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 #include "faml/kernels.hpp"
 #include "faml/distances.hpp"
 #include "faml/io.hpp"
@@ -22,8 +23,7 @@ using namespace Eigen;
 
 const bool VERBOSE = false;
 
-std::random_device rd;
-std::mt19937 gen(rd());
+std::mt19937 gen(43);
 
 double uniformUnitRandom() {
 	std::uniform_real_distribution<> uniformGenerator(0, 1);
@@ -189,15 +189,6 @@ matrix<double> findOptimalWeights(const std::vector<sample_type> &samples,
 //	return covarianceMatrix.inverse();
 //}
 
-//void printPrediction(const std::string &filename, const std::vector<label>& predictions) {
-//	std::ofstream outputStream(filename);
-//	outputStream << "Id,Prediction\n";
-
-//	for (size_t i = 0; i < predictions.size(); ++i) {
-//		outputStream << i + 1 << "," << predictions[i] << "\n";
-//	}
-//}
-
 class Timer {
 public:
 	Timer(const std::string &name): name(name), startTime(clock()), stopped(false) {
@@ -222,18 +213,24 @@ private:
 	bool stopped;
 };
 
+template<typename LabelType>
+void printPrediction(const std::string &filename, const Table<LabelType>& predictions) {
+	std::ofstream outputStream(filename);
+	outputStream << "Id,Prediction\n";
+
+	for (size_t i = 0; i < predictions.rowsNumber(); ++i) {
+		outputStream << i + 1 << "," << predictions[i] << "\n";
+	}
+}
+
 typedef VectorXf sampleType;
 typedef unsigned long labelType;
 
 int main(int argc, char **argv) {
-	Timer predictTimer("predict");
-
 	if(argc < 2) {
 		cerr << "usage: " << argv[0] << " train [test]" << endl;
 		exit(EXIT_FAILURE);
 	}
-
-	Timer prepareTimer("prepare");
 
 	std::string trainsetFilename(argv[1]);
 	Table< std::vector<std::string> > dataset(readCSV(trainsetFilename));
@@ -257,82 +254,78 @@ int main(int argc, char **argv) {
 	trainSamplesString.clear();
 	trainLabelsString.clear();
 
-	Table<sampleType> trainSamplesTrain(trainSamples.getColumnsNames());
-	Table<labelType> trainLabelsTrain(trainLabels.getColumnsNames());
-	Table<sampleType> trainSamplesTest(trainSamples.getColumnsNames());
-	Table<labelType> trainLabelsTest(trainLabels.getColumnsNames());
+	Table<sampleType> trainSamplesTrain(trainSamples.columnsNames());
+	Table<labelType> trainLabelsTrain(trainLabels.columnsNames());
+	Table<sampleType> trainSamplesTest(trainSamples.columnsNames());
+	Table<labelType> trainLabelsTest(trainLabels.columnsNames());
 
 	trainTestSplit(trainSamples, trainLabels,
 				trainSamplesTrain, trainLabelsTrain,
 				trainSamplesTest, trainLabelsTest,
 				0.1);
 
-	NormalScaler normalScaler;
-	normalScaler.train(trainSamplesTrain);
+	std::vector<std::unique_ptr<Scaler<sampleType>>> scalers;
+	scalers.emplace_back(new DummyScaler<sampleType>());
+//	scalers.emplace_back(new PowerAmplifyScaler(0.5));
+//	scalers.emplace_back(new NormalScaler());
+//	scalers.emplace_back(new MinMaxScaler(trainSamples.columnsNumber(), 0, 1));
 
-	for (auto &sample : trainSamplesTrain) {
-		sample = normalScaler(sample);
-	}
+	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+//	distances.emplace_back(new EuclidianDistance());
+//	distances.emplace_back(new MinkowskiDistance(3.0));
+//	distances.emplace_back(new MinkowskiDistance(5.0));
+	distances.emplace_back(new CosineDistance());
+//	distances.emplace_back(new OverlapDistance());
 
-	for (auto &sample : trainSamplesTest) {
-		sample = normalScaler(sample);
-	}
+	std::vector<std::unique_ptr<KernelFunction>> kernels;
+//	kernels.emplace_back(new RBFKernel(1.0));
+//	kernels.emplace_back(new RBFKernel(4.0));
+//	kernels.emplace_back(new InverseKernel());
+//	kernels.emplace_back(new TriangleKernel());
+	kernels.emplace_back(new QuarticKernel());
+//	kernels.emplace_back(new EpanechnikovKernel());
+//	kernels.emplace_back(new DiscreteKernel());
 
-	MatrixXf inverseCovarianceMatrix;
-//	inverseCovarianceMatrix = covarianceMatrix(trainSamplesTrain).inverse();
+	for (const auto &scaler : scalers) {
+		(*scaler).train(trainSamplesTrain);
+		Table<sampleType> trainSamplesTrainScaled = (*scaler)(trainSamplesTrain);
+		Table<sampleType> trainSamplesTestScaled = (*scaler)(trainSamplesTest);
 
-	int power = 2;
+		for (const auto &distance : distances) {
+			for (const auto &kernel : kernels) {
+				for (size_t K = 1; K < 20; ++K) {
+					KNNClassifier<sampleType, labelType> classifier(K, *distance, *kernel);
+					classifier.train(trainSamplesTrainScaled, trainLabelsTrain);
+					Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTestScaled);
 
-	MinkowskiDistance minkowskiDistance(power);
-	double gamma = 4.0;
-	RBFKernel rbfKernel(gamma);
-	InverseKernel inverseKernel();
-	TriangleKernel triangleKernel;
-	QuarticKernel quarticKernel;
-	EpanechnikovKernel epanechnikovKernel;
-	DiscreteKernel discreteKernel;
-
-	// removeOutliers(&trainSamplesTrain, &trainLabelsTrain, &minkowskiDistance, 0.001);
-	// removeOutliers(&trainSamples, &trainLabels, &minkowskiDistance, 0.001);
-
-	MatrixXf weights = VectorXf::Ones(trainSamples.columnsNumber());
-	// weights = findOptimalWeights(trainSamplesTrain, trainLabelsTrain, 0.1, power);
-	// std::cerr << weights << std::endl;
-
-	WMinkowskiDistance wminkowskiDistance(power, weights);
-	// MulticlassWMinkowskiDistance multiclassWminkowskiDistance(power, multiclassWeights);
-	MahalanobisDistance mahalanobisDistance(inverseCovarianceMatrix);
-	CosineDistance cosineDistance;
-	OverlapDistance overlapDistance;
-
-	prepareTimer.stop();
-
-	{
-		Timer knnRunsTimer("knn runs");
-		for (size_t K = 1; K < 20; ++K) {
-			KNNClassifier<sampleType, labelType> classifier(K, minkowskiDistance, quarticKernel);
-			classifier.train(trainSamplesTrain, trainLabelsTrain);
-			Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTest);
-
-			double accuracy = accuracyScore(trainLabelsTest, trainLabelsTestPrediction);
-			std::cout << "K: " << K << " Accuracy: " << accuracy << std::endl;
+					double accuracy = accuracyScore(trainLabelsTest, trainLabelsTestPrediction);
+					std::cout << "Accuracy: " << accuracy << std::endl;
+					std::cout << "(K: " << K << "; " << scaler->toString() << "; "
+							  << distance->toString() <<  "; " << kernel->toString() << ")" << std::endl << std::endl;
+				}
+			}
 		}
 	}
 
-/*
 	if (argc == 3) {
 		std::string testsetFilename(argv[2]);
-		Table<sampleType> testSamples(readCSV<sampleType>(testsetFilename));
-		for (auto &sample : testSamples) {
-			sample = normalScaler(sample);
-		}
+		Table<std::vector<std::string>> testSamplesString(readCSV(testsetFilename));
+		Table<sampleType> testSamples(testSamplesString.castByElement<sampleType>(
+									 [](const std::string &sample) {
+											return std::stof(sample);
+										}
+									 ));
+//		for (auto &sample : testSamples) {
+//			sample = normalScaler(sample);
+//		}
 
-		KNNClassifier<sampleType, labelType> classifier(17, minkowskiDistance, rbfKernel);
-		classifier.train(trainSamples, trainLabels);
+		CosineDistance cosineDistance;
+		TriangleKernel triangleKernel;
+		KNNClassifier<sampleType, labelType> classifier(12, cosineDistance, triangleKernel);
+		classifier.train(trainSamplesTrain, trainLabelsTrain);
 		Table<labelType> trainLabelsTestPrediction = classifier.predict(testSamples);
-//		printPrediction("predictions.csv", trainLabelsTestPrediction);
+		printPrediction("predictions.csv", trainLabelsTestPrediction);
 	}
-*/
 
 	return 0;
 }

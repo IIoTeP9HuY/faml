@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "data.hpp"
+#include "data/table.hpp"
 
 namespace faml {
 

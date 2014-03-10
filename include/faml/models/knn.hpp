@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 #include "faml/distances.hpp"
 
 namespace faml {
@@ -19,9 +19,9 @@ public:
 		}
 	}
 
-	void train(const Table<DataType> &samples, const Table<LabelType> &labels) {
-		this->baseSamples = samples;
-		this->baseLabels = labels;
+	void train(const TableView<DataType> &samples, const TableView<LabelType> &labels) {
+		this->baseSamples = samples.toTable();
+		this->baseLabels = labels.toTable();
 	}
 
 	LabelType predict(const DataType &sample) {
@@ -51,15 +51,17 @@ public:
 		return std::max_element(labelWeight.begin(), labelWeight.end(), labelWeightPairComparator)->first;
 	}
 
-	Table<LabelType> predict(const Table<DataType> &samples) {
-		Table<LabelType> labels(baseLabels.getColumnsNames());
-		labels.resizeRows(samples.rowsNumber());
+	Table<LabelType> predict(const TableView<DataType> &samples) {
+		std::vector<LabelType> predictions(samples.rowsNumber());
 
 		#pragma omp parallel for
 		for (size_t i = 0; i < samples.rowsNumber(); ++i) {
-			labels[i] = predict(samples[i]);
+			predictions[i] = predict(samples[i]);
 		}
-		return labels;
+
+		return Table<LabelType> (baseLabels.columnsNames(),
+								 std::make_move_iterator(predictions.begin()),
+								 std::make_move_iterator(predictions.end()));
 	}
 
 private:
