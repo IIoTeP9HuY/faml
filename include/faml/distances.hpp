@@ -39,7 +39,7 @@ struct EuclidianDistance : DistanceFunction<VectorXf> {
 		return "EuclidianDistance";
 	}
 
-	virtual ~EuclidianDistance() {};
+	virtual ~EuclidianDistance() {}
 };
 
 struct MinkowskiDistance : DistanceFunction<VectorXf> {

@@ -88,6 +88,38 @@ ConfusionMatrix<LabelType> confusionMatrix(const TableView<LabelType> &realLabel
 	return result;
 }
 
+template<typename LabelType>
+class MeanScorer {
+	typedef std::function<double(const TableView<LabelType> &realLabels,
+								 const TableView<LabelType> &predictedLabels)> ScoreFunction;
+public:
+	MeanScorer(const ScoreFunction &scoreFunction):
+		scoreFunction(scoreFunction), totalScore(0), updatesNumber(0) {}
+
+	double score() {
+		if (updatesNumber == 0) {
+			throw std::logic_error("Can't calculate score without samples");
+		}
+
+		return totalScore / updatesNumber;
+	}
+
+	void updateScore(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
+		totalScore += scoreFunction(realLabels, predictedLabels);
+		++updatesNumber;
+	}
+
+private:
+	ScoreFunction scoreFunction;
+	double totalScore;
+	size_t updatesNumber;
+};
+
+template<typename LabelType>
+class AccuracyScorer : public MeanScorer<LabelType> {
+	AccuracyScorer(): MeanScorer<LabelType>(accuracyScore) {}
+};
+
 } // namespace faml
 
 #endif // CLASSIFICATION_HPP
