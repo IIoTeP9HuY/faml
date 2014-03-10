@@ -15,12 +15,23 @@
 #include "faml/cross_validation/cross_validation.hpp"
 #include "faml/cross_validation/split.hpp"
 #include "faml/quality/classification.hpp"
-
+#include "faml/cross_validation/kfold.hpp"
 using namespace std;
 using namespace faml;
 using namespace Eigen;
 
+std::string print(const vector<size_t>& a) {
+	std::stringstream ss;
+	ss << "[";
+	for(auto x: a)
+		ss << x << ' ';
+	ss << "]";
+	return ss.str();
+}
 int main() {
+	for (const auto& z: KFold(14, 4)) {
+		cout << print(z.first) << ' ' << print(z.second) << "\n";
+	}
 	auto testData = readCSV("mnist_small_train.csv");
 	typedef std::vector<std::string> StrRowType;
 	typedef VectorXf SampleType;
