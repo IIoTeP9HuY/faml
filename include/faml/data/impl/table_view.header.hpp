@@ -1,12 +1,13 @@
 #ifndef TABLE_VIEW_HEADER_HPP
 #define TABLE_VIEW_HEADER_HPP
-
+#include <vector>
+#include <string>
+#include "faml/utility/iterator.hpp"
 namespace faml {
 
 template <typename RowType>
 class TableView {
 public:
-
 	class BaseIterator {
 	public:
 		virtual BaseIterator& operator ++ () = 0;
@@ -19,37 +20,9 @@ public:
 		}
 
 		virtual ~BaseIterator(){}
-
+		typedef RowType value_type;
 	};
-
-	class iterator {
-	public:
-		iterator(std::unique_ptr<BaseIterator>&& base): base(std::move(base)) {
-		}
-
-		virtual iterator& operator ++ () {
-			++*base;
-			return *this;
-		}
-
-		virtual iterator& operator -- () {
-			--*base;
-			return *this;
-		}
-
-		virtual const RowType& operator * () const {
-			return **base;
-		}
-		virtual bool operator == (const iterator& rhs) const {
-			return *base == *rhs.base;
-		}
-
-		virtual bool operator != (const iterator& rhs) const {
-			return !(*this == rhs);
-		}
-	private:
-		std::unique_ptr<BaseIterator> base;
-	};
+	typedef Iterator<BaseIterator> iterator;
 
 	TableView() {}
 
@@ -72,7 +45,10 @@ public:
 	virtual bool empty() const;
 
 	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
-	Table<NewRowType> cast(FunctionType castFunction) const;
+	Table<NewRowType> cast(const FunctionType& castFunction) const;
+
+	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
+	Table<NewRowType> cast(const FunctionType& castFunction, const std::vector<std::string>&) const;
 
 	template <typename NewRowType, typename FunctionType>
 	Table<NewRowType> castByElement(FunctionType castFunction) const;

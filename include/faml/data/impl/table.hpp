@@ -2,7 +2,6 @@
 #define IMPL_TABLE_HPP
 
 #include <vector>
-
 namespace faml {
 
 template<typename RowType>
