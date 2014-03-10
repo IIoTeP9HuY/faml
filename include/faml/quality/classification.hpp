@@ -117,6 +117,7 @@ private:
 
 template<typename LabelType>
 class AccuracyScorer : public MeanScorer<LabelType> {
+public:
 	AccuracyScorer(): MeanScorer<LabelType>(accuracyScore) {}
 };
 
