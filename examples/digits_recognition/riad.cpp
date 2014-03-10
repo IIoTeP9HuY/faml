@@ -13,9 +13,10 @@
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/cross_validation/cross_validation.hpp"
-#include "faml/cross_validation/split.hpp"
 #include "faml/quality/classification.hpp"
 #include "faml/cross_validation/kfold.hpp"
+#include "faml/cross_validation/shuffle_split.hpp"
+
 using namespace std;
 using namespace faml;
 using namespace Eigen;
@@ -29,7 +30,7 @@ std::string print(const vector<size_t>& a) {
 	return ss.str();
 }
 int main() {
-	for (const auto& z: KFold(14, 4)) {
+	for (const auto& z: ShuffleSplit(14, (size_t)4, 5, 41)) {
 		cout << print(z.first) << ' ' << print(z.second) << "\n";
 	}
 	auto testData = readCSV("mnist_small_train.csv");
@@ -54,9 +55,7 @@ int main() {
 
 	auto columns = trainX.columnsNames();
 
-	mt19937 gen(1993);
-
-	auto indicies = trainTestSplit(trainX.rowsNumber(), (size_t)19000, gen);
+	auto indicies = trainTestSplit(trainX.rowsNumber(), (size_t)19000, 43);
 	auto subtrainX = trainX[indicies.first];
 	auto subtrainY = trainY[indicies.first];
 	auto subtestX = trainX[indicies.second];
