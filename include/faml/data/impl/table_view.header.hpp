@@ -32,7 +32,7 @@ public:
 
 	virtual const RowType &operator [] (size_t index) const = 0;
 
-	virtual TableRowsProxy<RowType> operator [] (const std::vector<size_t> &indicies);
+	virtual TableRowsProxy<RowType> operator [] (const std::vector<size_t> &indicies) const ;
 
 	virtual iterator begin() const = 0;
 

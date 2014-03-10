@@ -118,7 +118,7 @@ private:
 template<typename LabelType>
 class AccuracyScorer : public MeanScorer<LabelType> {
 public:
-	AccuracyScorer(): MeanScorer<LabelType>(accuracyScore) {}
+	AccuracyScorer(): MeanScorer<LabelType>(accuracyScore<LabelType>) {}
 };
 
 } // namespace faml

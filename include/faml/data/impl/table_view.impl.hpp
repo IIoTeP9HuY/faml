@@ -17,7 +17,7 @@ Table<RowType> TableView<RowType>::toTable() const {
 }
 
 template <typename RowType>
-TableRowsProxy<RowType> TableView<RowType>::operator [] (const std::vector<size_t> &indicies) {
+TableRowsProxy<RowType> TableView<RowType>::operator [] (const std::vector<size_t> &indicies) const {
 	return TableRowsProxy<RowType>(*this, indicies);
 }
 
