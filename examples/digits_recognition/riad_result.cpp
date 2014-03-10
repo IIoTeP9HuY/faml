@@ -6,13 +6,13 @@
 #include <tuple>
 #include <memory>
 
-#include "faml/data.hpp"
+#include "faml/data/table.hpp"
 #include "faml/kernels.hpp"
 #include "faml/distances.hpp"
 #include "faml/io.hpp"
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
-#include "faml/cross_validation.hpp"
+#include "faml/cross_validation/cross_validation.hpp"
 #include "faml/quality/classification.hpp"
 
 using namespace std;
