@@ -38,7 +38,35 @@ int main() {
 			return std::stod(x);
 		}
 	);
+	cerr << "before" << endl;
+	int size = 28;
+	trainX = trainX.cast(
+		[size](const VectorXf& vv) {
+			VectorXf res = VectorXf::Zero(size * size);
 
+			for(int i = 0; i < size; ++i) {
+				for(int j = 0; j < size; ++j) {
+					int cnt = 0;
+					for(int ii = -1; ii <= 1; ++ii) {
+						for(int jj = -1; jj <= 1; ++jj){
+							if(i + ii < 0 || i + ii >= size) {
+								continue;
+							}
+							if(j + jj < 0 || j + jj >= size) {
+								continue;
+							}
+							++cnt;
+							res[i * size + j] += vv[(i + ii) * size + j + jj];
+						}
+					}
+					res[i * size + j] /= cnt;
+				}
+			}
+			return res;
+		}
+	);
+
+	cerr << "after" << endl;
 	auto test = testStr.castByElement<VectorXf>(
 		[](const std::string& x) {
 			return std::stod(x);
@@ -67,20 +95,19 @@ int main() {
 	distances.emplace_back(new CosineDistance());
 //	distances.emplace_back(new OverlapDistance());
 
-	for(const auto& scaler: scalers) {
-		scaler->train(trainX);
-		auto lambda = [&scaler](const VectorXf& row) {
-			return (*scaler)(row);
-		};
-		auto scaledX = trainX.cast(lambda);
-		auto scaledTest = test.cast(lambda);
-		for(size_t k = 19; k <= 19; ++k) {
+	//for(const auto& scaler: scalers) {
+	//	scaler->train(trainX);
+	//	auto lambda = [&scaler](const VectorXf& row) {
+	//		return (*scaler)(row);
+	//	};
+		//auto scaledX = trainX.cast(lambda);
+		//auto scaledTest = test.cast(lambda);
+		for(size_t k = 12; k <= 12; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
-					clock_t start = clock();
 					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
-					knn.train(scaledX, trainY);
-					auto prediction = knn.predict(scaledTest);
+					knn.train(trainX, trainY);
+					auto prediction = knn.predict(test);
 					cout << "Id,Prediction" << "\n";
 					for(size_t i = 0; i < prediction.rowsNumber(); ++i) {
 						cout << i + 1 << "," << prediction[i] << "\n";
@@ -92,7 +119,7 @@ int main() {
 				}
 			}
 		}
-	}
+	//}
 
 	return 0;
 }
