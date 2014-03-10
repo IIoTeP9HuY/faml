@@ -1,5 +1,7 @@
 #ifndef TABLE_VIEW_HEADER_HPP
 #define TABLE_VIEW_HEADER_HPP
+#include <vector>
+#include <string>
 
 namespace faml {
 
@@ -72,7 +74,10 @@ public:
 	virtual bool empty() const;
 
 	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
-	Table<NewRowType> cast(FunctionType castFunction) const;
+	Table<NewRowType> cast(const FunctionType& castFunction) const;
+
+	template <typename FunctionType, typename NewRowType = decltype(std::declval<FunctionType>()(std::declval<RowType>()))>
+	Table<NewRowType> cast(const FunctionType& castFunction, const std::vector<std::string>&) const;
 
 	template <typename NewRowType, typename FunctionType>
 	Table<NewRowType> castByElement(FunctionType castFunction) const;

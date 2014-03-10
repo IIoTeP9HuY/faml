@@ -28,8 +28,14 @@ bool TableView<RowType>::empty() const {
 
 template <typename RowType>
 template <typename FunctionType, typename NewRowType>
-Table<NewRowType> TableView<RowType>::cast(FunctionType castFunction) const {
-	Table<NewRowType> castedTable(columnsNames());
+Table<NewRowType> TableView<RowType>::cast(const FunctionType& castFunction) const {
+	return cast(castFunction, columnsNames());
+}
+
+template <typename RowType>
+template <typename FunctionType, typename NewRowType>
+Table<NewRowType> TableView<RowType>::cast(const FunctionType& castFunction, const std::vector<std::string>& newColumnsNames) const {
+	Table<NewRowType> castedTable(newColumnsNames);
 	for (const RowType &sample : (*this)) {
 		castedTable.addRow(castFunction(sample));
 	}
