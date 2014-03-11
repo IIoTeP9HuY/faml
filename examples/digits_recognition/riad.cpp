@@ -48,7 +48,7 @@ int main() {
 	);
 	cerr << "casted Y" << endl;
 
-	auto rtrainX = trainXstr.castByElement<VectorXf>(
+	auto trainX = trainXstr.castByElement<VectorXf>(
 		[](const std::string& x) {
 			return std::stod(x);
 		}
@@ -78,7 +78,7 @@ int main() {
 	 
 	size /= 2;*/
 
-	auto trainX = rtrainX.cast(
+/*	trainX = rtrainX.cast(
 		[size](const VectorXf& vv) {
 			VectorXf res = VectorXf::Zero(size * size);
 
@@ -102,9 +102,34 @@ int main() {
 			}
 			return res;
 		}
-	);
+	);*/
+	trainX = trainX.cast(
+		[size](const VectorXf& vv) {
+			VectorXf res = VectorXf::Zero(size * size);
 
-	rtrainX.clear();
+			for(int i = 0; i < size; ++i) {
+				for(int j = 0; j < size; ++j) {
+					int cnt = 0;
+					for(int ii = -1; ii <= 1; ++ii) {
+						for(int jj = -1; jj <= 1; ++jj){
+							if(abs(ii) + abs(jj) == 2)
+								continue;
+							if(i + ii < 0 || i + ii >= size) {
+								continue;
+							}
+							if(j + jj < 0 || j + jj >= size) {
+								continue;
+							}
+							++cnt;
+							res[i * size + j] += vv[(i + ii) * size + j + jj];
+						}
+					}
+					res[i * size + j] /= cnt;
+				}
+			}
+			return res;
+		}
+	);
 	cerr << "preprocessed" << endl;
 
 	auto columns = trainX.columnsNames();

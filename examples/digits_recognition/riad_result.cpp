@@ -41,35 +41,44 @@ int main() {
 	cerr << "before" << endl;
 	int size = 28;
 	trainX = trainX.cast(
-		[size](const VectorXf& vv) {
-			VectorXf res = VectorXf::Zero(size * size);
-
-			for(int i = 0; i < size; ++i) {
-				for(int j = 0; j < size; ++j) {
-					int cnt = 0;
-					for(int ii = -1; ii <= 1; ++ii) {
-						for(int jj = -1; jj <= 1; ++jj){
-							if(i + ii < 0 || i + ii >= size) {
-								continue;
-							}
-							if(j + jj < 0 || j + jj >= size) {
-								continue;
-							}
-							++cnt;
-							res[i * size + j] += vv[(i + ii) * size + j + jj];
+		[](const VectorXf& v) {
+			VectorXf res = VectorXf::Zero(14 * 14);
+			for(int i = 0; i < 14; ++i) {
+				for(int j = 0; j < 14; ++j) {
+					for(int ii = 0; ii < 2; ++ii) {
+						for(int jj = 0; jj < 2; ++jj) {
+							res[i * 14 + j] += v[(2 * i + ii) * 28 + 2 * j + jj];
 						}
 					}
-					res[i * size + j] /= cnt;
 				}
 			}
 			return res;
 		}
 	);
+	 
+	size /= 2;
 
 	cerr << "after" << endl;
 	auto test = testStr.castByElement<VectorXf>(
 		[](const std::string& x) {
 			return std::stod(x);
+		}
+	);
+
+	
+	test = test.cast(
+		[](const VectorXf& v) {
+			VectorXf res = VectorXf::Zero(14 * 14);
+			for(int i = 0; i < 14; ++i) {
+				for(int j = 0; j < 14; ++j) {
+					for(int ii = 0; ii < 2; ++ii) {
+						for(int jj = 0; jj < 2; ++jj) {
+							res[i * 14 + j] += v[(2 * i + ii) * 28 + 2 * j + jj];
+						}
+					}
+				}
+			}
+			return res;
 		}
 	);
 	trainXstr.clear();
