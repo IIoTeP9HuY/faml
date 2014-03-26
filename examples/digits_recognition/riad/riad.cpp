@@ -34,28 +34,109 @@ int main() {
 		cout << print(z.first) << ' ' << print(z.second) << "\n";
 	}
 	auto testData = readCSV("mnist_small_train.csv");
+	cerr << "read" << endl;
 	typedef std::vector<std::string> StrRowType;
 	typedef VectorXf SampleType;
 	typedef unsigned long long Label;
 	Table<StrRowType> trainXstr, trainYstr;
 	std::tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});
+	cerr << "splitted" << endl;
 	auto trainY = trainYstr.cast(
 		[](const StrRowType &sample) { 
 			return std::stoull(sample[0]); 
 		}
 	);
+	cerr << "casted Y" << endl;
 
 	auto trainX = trainXstr.castByElement<VectorXf>(
 		[](const std::string& x) {
 			return std::stod(x);
 		}
 	);
+	cerr << "casted X" << endl;
 	trainXstr.clear();
 	trainYstr.clear();
+	cerr << "before preprocessing" << endl;
+	int size = 28;
+
+
+	/*auto trainX = rtrainX.cast(
+		[](const VectorXf& v) {
+			VectorXf res = VectorXf::Zero(14 * 14);
+			for(int i = 0; i < 14; ++i) {
+				for(int j = 0; j < 14; ++j) {
+					for(int ii = 0; ii < 2; ++ii) {
+						for(int jj = 0; jj < 2; ++jj) {
+							res[i * 14 + j] += v[(2 * i + ii) * 28 + 2 * j + jj];
+						}
+					}
+				}
+			}
+			return res;
+		}
+	);
+	 
+	size /= 2;*/
+
+/*	trainX = rtrainX.cast(
+		[size](const VectorXf& vv) {
+			VectorXf res = VectorXf::Zero(size * size);
+
+			for(int i = 0; i < size; ++i) {
+				for(int j = 0; j < size; ++j) {
+					int cnt = 0;
+					for(int ii = -1; ii <= 1; ++ii) {
+						for(int jj = -1; jj <= 1; ++jj){
+							if(i + ii < 0 || i + ii >= size) {
+								continue;
+							}
+							if(j + jj < 0 || j + jj >= size) {
+								continue;
+							}
+							++cnt;
+							res[i * size + j] += vv[(i + ii) * size + j + jj];
+						}
+					}
+					res[i * size + j] /= cnt;
+				}
+			}
+			return res;
+		}
+	);*/
+	trainX = trainX.cast(
+		[size](const VectorXf& vv) {
+			VectorXf res = VectorXf::Zero(size * size);
+
+			for(int i = 0; i < size; ++i) {
+				for(int j = 0; j < size; ++j) {
+					int cnt = 0;
+					for(int ii = -1; ii <= 1; ++ii) {
+						for(int jj = -1; jj <= 1; ++jj){
+							if(abs(ii) + abs(jj) == 2)
+								continue;
+							if(i + ii < 0 || i + ii >= size) {
+								continue;
+							}
+							if(j + jj < 0 || j + jj >= size) {
+								continue;
+							}
+							++cnt;
+							res[i * size + j] += vv[(i + ii) * size + j + jj];
+						}
+					}
+					res[i * size + j] /= cnt;
+				}
+			}
+			return res;
+		}
+	);
+	cerr << "preprocessed" << endl;
 
 	auto columns = trainX.columnsNames();
 
-	auto indicies = trainTestSplit(trainX.rowsNumber(), (size_t)19000, 43);
+	cerr << "here" << endl;
+	auto indicies = trainTestSplit(trainX.rowsNumber(), (size_t)19000, 2013);
+	cerr << "here" << endl;
 	auto subtrainX = trainX[indicies.first];
 	auto subtrainY = trainY[indicies.first];
 	auto subtestX = trainX[indicies.second];
@@ -83,13 +164,13 @@ int main() {
 //		};
 //		auto scaledX = subtrainX.cast(lambda);
 //		auto scaledTest = subtestX.cast(lambda);
-		for(size_t k = 17; k <= 19; ++k) {
+		for(size_t k = 1; k <= 20; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
 					clock_t start = clock();
 					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
-					double res = crossValidate(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 2), AccuracyScorer<Label>());
-					cout << distance->toString() << ' ' << kernel->toString() << "\n";
+					double res = crossValidate(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 5), AccuracyScorer<Label>());
+					cout << k << ' ' <<distance->toString() << ' ' << kernel->toString() << "\n";
 					cout << "Score: " << res << "\n";
 					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;
 					cout << endl;

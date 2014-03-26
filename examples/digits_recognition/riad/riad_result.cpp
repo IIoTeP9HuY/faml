@@ -38,10 +38,47 @@ int main() {
 			return std::stod(x);
 		}
 	);
+	cerr << "before" << endl;
+	int size = 28;
+	trainX = trainX.cast(
+		[](const VectorXf& v) {
+			VectorXf res = VectorXf::Zero(14 * 14);
+			for(int i = 0; i < 14; ++i) {
+				for(int j = 0; j < 14; ++j) {
+					for(int ii = 0; ii < 2; ++ii) {
+						for(int jj = 0; jj < 2; ++jj) {
+							res[i * 14 + j] += v[(2 * i + ii) * 28 + 2 * j + jj];
+						}
+					}
+				}
+			}
+			return res;
+		}
+	);
+	 
+	size /= 2;
 
+	cerr << "after" << endl;
 	auto test = testStr.castByElement<VectorXf>(
 		[](const std::string& x) {
 			return std::stod(x);
+		}
+	);
+
+	
+	test = test.cast(
+		[](const VectorXf& v) {
+			VectorXf res = VectorXf::Zero(14 * 14);
+			for(int i = 0; i < 14; ++i) {
+				for(int j = 0; j < 14; ++j) {
+					for(int ii = 0; ii < 2; ++ii) {
+						for(int jj = 0; jj < 2; ++jj) {
+							res[i * 14 + j] += v[(2 * i + ii) * 28 + 2 * j + jj];
+						}
+					}
+				}
+			}
+			return res;
 		}
 	);
 	trainXstr.clear();
@@ -67,20 +104,19 @@ int main() {
 	distances.emplace_back(new CosineDistance());
 //	distances.emplace_back(new OverlapDistance());
 
-	for(const auto& scaler: scalers) {
-		scaler->train(trainX);
-		auto lambda = [&scaler](const VectorXf& row) {
-			return (*scaler)(row);
-		};
-		auto scaledX = trainX.cast(lambda);
-		auto scaledTest = test.cast(lambda);
-		for(size_t k = 19; k <= 19; ++k) {
+	//for(const auto& scaler: scalers) {
+	//	scaler->train(trainX);
+	//	auto lambda = [&scaler](const VectorXf& row) {
+	//		return (*scaler)(row);
+	//	};
+		//auto scaledX = trainX.cast(lambda);
+		//auto scaledTest = test.cast(lambda);
+		for(size_t k = 12; k <= 12; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
-					clock_t start = clock();
 					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
-					knn.train(scaledX, trainY);
-					auto prediction = knn.predict(scaledTest);
+					knn.train(trainX, trainY);
+					auto prediction = knn.predict(test);
 					cout << "Id,Prediction" << "\n";
 					for(size_t i = 0; i < prediction.rowsNumber(); ++i) {
 						cout << i + 1 << "," << prediction[i] << "\n";
@@ -92,7 +128,7 @@ int main() {
 				}
 			}
 		}
-	}
+	//}
 
 	return 0;
 }
