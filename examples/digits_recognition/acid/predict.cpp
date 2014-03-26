@@ -16,39 +16,15 @@
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/quality/classification.hpp"
 #include "faml/statistics/statistics.hpp"
+#include "faml/cross_validation/shuffle_split.hpp"
+#include "faml/cross_validation/cross_validation.hpp"
+#include "faml/cross_validation/kfold.hpp"
 
 using namespace std;
 using namespace faml;
 using namespace Eigen;
 
 const bool VERBOSE = false;
-
-std::mt19937 gen(43);
-
-double uniformUnitRandom() {
-	std::uniform_real_distribution<> uniformGenerator(0, 1);
-	return uniformGenerator(gen);
-}
-
-template<typename DataType, typename LabelType>
-void trainTestSplit(const Table<DataType> &samples, const Table<LabelType> &labels,
-					Table<DataType> &trainSamples, Table<LabelType> &trainLabels,
-					Table<DataType> &testSamples, Table<LabelType> &testLabels,
-					double testProportion) {
-
-	size_t N = samples.rowsNumber();
-
-	for (size_t i = 0; i < N; ++i) {
-		if (uniformUnitRandom() < testProportion) {
-			testSamples.addRow(samples[i]);
-			testLabels.addRow(labels[i]);
-		} else {
-			trainSamples.addRow(samples[i]);
-			trainLabels.addRow(labels[i]);
-		}
-	}
-}
-
 
 /*
 template<typename DataType, typename LabelType>
@@ -254,24 +230,22 @@ int main(int argc, char **argv) {
 	trainSamplesString.clear();
 	trainLabelsString.clear();
 
-	Table<sampleType> trainSamplesTrain(trainSamples.columnsNames());
-	Table<labelType> trainLabelsTrain(trainLabels.columnsNames());
-	Table<sampleType> trainSamplesTest(trainSamples.columnsNames());
-	Table<labelType> trainLabelsTest(trainLabels.columnsNames());
+	std::cerr << "Features number: " << trainSamples.columnsNumber() << std::endl;
 
-	trainTestSplit(trainSamples, trainLabels,
-				trainSamplesTrain, trainLabelsTrain,
-				trainSamplesTest, trainLabelsTest,
-				0.1);
+	auto indicies = trainTestSplit(trainSamples.rowsNumber(), (size_t) 20000, 42);
+	trainSamples = trainSamples[indicies.first].toTable();
+	trainLabels = trainLabels[indicies.first].toTable();
+//	auto subtestX = trainX[indicies.second];
+//	auto subtestY = trainY[indicies.second];
 
 	std::vector<std::unique_ptr<Scaler<sampleType>>> scalers;
 	scalers.emplace_back(new DummyScaler<sampleType>());
-//	scalers.emplace_back(new PowerAmplifyScaler(0.5));
+//	scalers.emplace_back(new PowerAmplifyScaler(2.5));
 //	scalers.emplace_back(new NormalScaler());
 //	scalers.emplace_back(new MinMaxScaler(trainSamples.columnsNumber(), 0, 1));
 
 	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
-//	distances.emplace_back(new EuclidianDistance());
+	distances.emplace_back(new EuclidianDistance());
 //	distances.emplace_back(new MinkowskiDistance(3.0));
 //	distances.emplace_back(new MinkowskiDistance(5.0));
 	distances.emplace_back(new CosineDistance());
@@ -284,21 +258,20 @@ int main(int argc, char **argv) {
 //	kernels.emplace_back(new TriangleKernel());
 	kernels.emplace_back(new QuarticKernel());
 //	kernels.emplace_back(new EpanechnikovKernel());
-//	kernels.emplace_back(new DiscreteKernel());
+	kernels.emplace_back(new DiscreteKernel());
 
 	for (const auto &scaler : scalers) {
-		(*scaler).train(trainSamplesTrain);
-		Table<sampleType> trainSamplesTrainScaled = (*scaler)(trainSamplesTrain);
-		Table<sampleType> trainSamplesTestScaled = (*scaler)(trainSamplesTest);
+		(*scaler).train(trainSamples);
+		Table<sampleType> trainSamplesScaled = (*scaler)(trainSamples);
 
 		for (const auto &distance : distances) {
 			for (const auto &kernel : kernels) {
 				for (size_t K = 1; K < 20; ++K) {
 					KNNClassifier<sampleType, labelType> classifier(K, *distance, *kernel);
-					classifier.train(trainSamplesTrainScaled, trainLabelsTrain);
-					Table<labelType> trainLabelsTestPrediction = classifier.predict(trainSamplesTestScaled);
+					classifier.train(trainSamplesScaled, trainLabels);
 
-					double accuracy = accuracyScore(trainLabelsTest, trainLabelsTestPrediction);
+					double accuracy = crossValidate(classifier, trainSamplesScaled, trainLabels, KFold(trainSamples.rowsNumber(), 20), AccuracyScorer<labelType>());
+//					double accuracy = crossValidate(classifier, trainSamplesScaled, trainLabels, ShuffleSplit(trainSamples.rowsNumber(), 0.05, 4), AccuracyScorer<labelType>());
 					std::cout << "Accuracy: " << accuracy << std::endl;
 					std::cout << "(K: " << K << "; " << scaler->toString() << "; "
 							  << distance->toString() <<  "; " << kernel->toString() << ")" << std::endl << std::endl;
@@ -320,9 +293,9 @@ int main(int argc, char **argv) {
 //		}
 
 		CosineDistance cosineDistance;
-		TriangleKernel triangleKernel;
-		KNNClassifier<sampleType, labelType> classifier(12, cosineDistance, triangleKernel);
-		classifier.train(trainSamplesTrain, trainLabelsTrain);
+		QuarticKernel quarticKernel;
+		KNNClassifier<sampleType, labelType> classifier(13, cosineDistance, quarticKernel);
+		classifier.train(trainSamples, trainLabels);
 		Table<labelType> trainLabelsTestPrediction = classifier.predict(testSamples);
 		printPrediction("predictions.csv", trainLabelsTestPrediction);
 	}

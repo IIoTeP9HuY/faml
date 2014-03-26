@@ -51,19 +51,53 @@ struct TrainObject
 		int partHeight = (H + partHNumber - 1) / partHNumber;
 		int partWidth = (W + partWNumber - 1) / partWNumber;
 
-		for (int i = 0; i < partHNumber; ++i)
-		{
-			for (int j = 0; j < partWNumber; ++j)
-			{
-				int hMin = min(0 + i * partHeight, (int) H);
-				int hMax = min(0 + (i + 1) * partHeight, (int) H);
-				int wMin = min(0 + j * partWidth, (int) W);
-				int wMax = min(0 + (j + 1) * partWidth, (int) W);
+//		for (int i = 0; i < partHNumber; ++i)
+//		{
+//			for (int j = 0; j < partWNumber; ++j)
+//			{
+//				int hMin = min(0 + i * partHeight, (int) H);
+//				int hMax = min(0 + (i + 1) * partHeight, (int) H);
+//				int wMin = min(0 + j * partWidth, (int) W);
+//				int wMax = min(0 + (j + 1) * partWidth, (int) W);
 
-				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
+//				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
+//			}
+//		}
+
+		int blurRows = 5;
+		int blurColumns = 5;
+
+		for (int i = 0; i < H; i += 2)
+		{
+			for (int j = 0; j < W; j += 2)
+			{
+				featureVector.push_back(calculateBlured(i, j, blurRows, blurColumns));
 			}
 		}
 
+//		blurRows = 3;
+//		blurColumns = 3;
+
+//		for (int i = 0; i < H; i += 1)
+//		{
+//			for (int j = 0; j < W; j += 1)
+//			{
+//				featureVector.push_back(calculateBlured(i, j, blurRows, blurColumns));
+//			}
+//		}
+
+//		blurRows = 5;
+//		blurColumns = 5;
+
+//		for (int i = 0; i < H; i += 3)
+//		{
+//			for (int j = 0; j < W; j += 3)
+//			{
+//				featureVector.push_back(calculateBlured(i, j, blurRows, blurColumns));
+//			}
+//		}
+
+		/*
 		partHNumber = 1;
 		partWNumber = 7;
 		partHeight = (H + partHNumber - 1) / partHNumber;
@@ -99,6 +133,32 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
+		*/
+
+		// ******************************
+		/*
+		partHNumber = 7;
+		partWNumber = 7;
+		partHeight = (H + partHNumber - 1) / partHNumber;
+		partWidth = (W + partWNumber - 1) / partWNumber;
+
+		for (int i = 0; i < partHNumber; ++i)
+		{
+			for (int j = 0; j < partWNumber; ++j)
+			{
+				int hMin = min(0 + i * partHeight, (int) H);
+				int hMax = min(0 + (i + 1) * partHeight, (int) H);
+				int wMin = min(0 + j * partWidth, (int) W);
+				int wMax = min(0 + (j + 1) * partWidth, (int) W);
+
+				std::vector<int> HOG = calculateHOGInRectangle_4(hMin, wMin, hMax, hMax);
+				for (int i = 0; i < HOG.size(); ++i) {
+					featureVector.push_back(HOG[i]);
+				}
+
+				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
+			}
+		}
 
 		partHNumber = 4;
 		partWNumber = 4;
@@ -117,6 +177,7 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
+		*/
 
 		// for (int h = H / 3; h < H - H / 3; ++h)
 		// {
@@ -165,11 +226,11 @@ struct TrainObject
 		// std::cerr << "-----------------" << std::endl;
 		//std::cerr << "class: " << classId << ", meanDistance: " << "(" << meanDistanceToMassCenter << ", " << meanDistanceToMassCenterPainted << ")" << std::endl;
 		featureVector.push_back(meanDistanceToMassCenter);
-		// featureVector.push_back(meanDistanceToMassCenterPainted);
+		 featureVector.push_back(meanDistanceToMassCenterPainted);
 
 		featureVector.push_back(imageH);
 		featureVector.push_back(imageW);
-		// featureVector.push_back(imageSidesRatio);
+		 featureVector.push_back(imageSidesRatio);
 
 		size_t perimeter = calculatePerimeter();
 
@@ -217,6 +278,7 @@ struct TrainObject
 
 		// featureVector.push_back(blackComponentsNumber);
 
+		// ******************************
 		/*
 		partHNumber = 5;
 		partWNumber = 5;
@@ -235,7 +297,6 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
-		*/
 
 		partHNumber = 1;
 		partWNumber = 3;
@@ -272,40 +333,35 @@ struct TrainObject
 				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
 			}
 		}
+		*/
 
-		partHNumber = 2;
-		partWNumber = 2;
+		partHNumber = 3;
+		partWNumber = 3;
 		partHeight = (imageH + partHNumber - 1) / partHNumber;
 		partWidth = (imageW + partWNumber - 1) / partWNumber;
 
-		// for (int i = 0; i < partHNumber; ++i)
-		// {
-		// 	for (int j = 0; j < partWNumber; ++j)
-		// 	{
-		// 		int hMin = min(hMinBound + i * partHeight, H);
-		// 		int hMax = min(hMinBound + (i + 1) * partHeight, H);
-		// 		int wMin = min(wMinBound + j * partWidth, W);
-		// 		int wMax = min(wMinBound + (j + 1) * partWidth, W);
+		 for (int i = 0; i < partHNumber; ++i)
+		 {
+			for (int j = 0; j < partWNumber; ++j)
+			{
+				int hMin = min(hMinBound + i * partHeight, H);
+				int hMax = min(hMinBound + (i + 1) * partHeight, H);
+				int wMin = min(wMinBound + j * partWidth, W);
+				int wMax = min(wMinBound + (j + 1) * partWidth, W);
 
-		// 		std::vector<int> HOG = calculateHOGInRectangle_4(hMin, wMin, hMax, hMax);
-		// 		// std::cerr << "class: " << classId << std::endl;
-		// 		for (int i = 0; i < HOG.size(); ++i) {
-		// 			// std::cerr << HOG[i] << " ";
-		// 			featureVector.push_back(HOG[i]);
-		// 		}
-		// 		std::cerr << std::endl;
+				std::vector<int> HOG = calculateHOGInRectangle_4(hMin, wMin, hMax, hMax);
+				for (int i = 0; i < HOG.size(); ++i) {
+					featureVector.push_back(HOG[i]);
+				}
 
-		// 		featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
-		// 	}
-		// }
+//				featureVector.push_back(calculateMeanColorInSquare(hMin, wMin, hMax, wMax));
+			}
+		 }
 
 		std::vector<int> HOG = calculateHOGInRectangle_4(hMinBound, wMinBound, hMaxBound, wMaxBound);
-		// std::cerr << "class: " << classId << std::endl;
 		for (int i = 0; i < HOG.size(); ++i) {
-			// std::cerr << HOG[i] << " ";
 			featureVector.push_back(HOG[i]);
 		}
-		// std::cerr << std::endl;
 
 		if (isTraining)
 		{
@@ -521,6 +577,28 @@ struct TrainObject
 		}
 
 		return changesNumber;
+	}
+
+	double calculateBlured(int row, int column, size_t windowRows, size_t windowColumns) {
+		double value = 0;
+		for (int i = row - windowRows / 2; i < row + windowRows / 2; ++i) {
+			for (int j = column - windowColumns / 2; j < column + windowColumns / 2; ++j) {
+
+				if (i < 0 || i >= H) {
+					value += image[row][column];
+					continue;
+				}
+
+				if (j < 0 || j >= W) {
+					value += image[row][column];
+					continue;
+				}
+
+				value += image[i][j];
+			}
+		}
+		value /= windowRows * windowColumns;
+		return value;
 	}
 
 	double calculateMeanPixelChangesNumberInColumns(size_t firstColumn, size_t lastColumn)
