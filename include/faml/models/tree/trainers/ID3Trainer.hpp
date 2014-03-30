@@ -17,11 +17,15 @@ struct ID3Node {
 		return row[index] == value ? l : r;
 	}
 };
+
 template<typename Row, typename Label>
 class ID3Trainer {
-	public:
-	Tree<ID3Node, Label> train(const TableView<Row>& x, const TableView<Label>& y) {
-		Tree<ID3Node, Label> tree;
+public:
+	typedef Row Row;
+	typedef Label Label;
+
+	Tree<ID3Node<Row>, Label> train(const TableView<Row>& x, const TableView<Label>& y) {
+		Tree<ID3Node<Row>, Label> tree;
 		train(x, y, 0);
 		return tree;
 	}

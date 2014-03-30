@@ -12,15 +12,15 @@ private:
 	std::vector<std::unique_ptr<Leaf>> leafs;
 
 public:
-	bool isLeaf(Node node) {
-		return leafs[node];
+	bool isLeaf(Node node) const {
+		return leafs[node] != nullptr;
 	}
 
-	Leaf getAsLeaf(Node node) {
+	Leaf getAsLeaf(Node node) const {
 		return *leafs[node];
 	}
 
-	Inner getAsInner(Node node) {
+	Inner getAsInner(Node node) const {
 		return *inners[node];
 	}
 
