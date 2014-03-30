@@ -4,6 +4,7 @@
 #include <limits>
 #include <unordered_map>
 #include <type_traits>
+#include <memory>
 
 #include "faml/models/tree/tree.hpp"
 #include "faml/statistics/informativity_criteria.hpp"
@@ -32,6 +33,9 @@ public:
 	typedef _Label Label;
 	typedef Tree<ID3Node<Row>, Label> TrainedTree;
 
+	ID3Trainer(std::shared_ptr<InformativityCriteria<Label>> criteria): criteria(criteria) {
+		
+	}
 	TrainedTree train(const TableView<Row>& x, const TableView<Label>& y) {
 		TrainedTree tree;
 		train(x, y, tree, 0);

@@ -10,20 +10,15 @@ namespace faml {
 
 template<typename Label>
 struct InformativityCriteria {
-	InformativityCriteria(const std::vector<Label> &labels): labels(labels) {}
 	virtual ~InformativityCriteria() {}
 
 	virtual double operator () (const TableView<Label> &positive, const TableView<Label> &negative) = 0;
 
-	std::vector<Label> labels;
 };
 
 template<typename Label>
-struct EntoropyCriteria : public InformativityCriteria<Label> {
-	EntoropyCriteria(const std::vector<Label> &labels): InformativityCriteria<Label> (labels) {}
-	~EntoropyCriteria() {}
-
-	using InformativityCriteria<Label>::labels;
+struct EntropyCriteria : public InformativityCriteria<Label> {
+	~EntropyCriteria() {}
 
 	inline double h(double x) const {
 		if (x == 0) {
@@ -33,14 +28,18 @@ struct EntoropyCriteria : public InformativityCriteria<Label> {
 	}
 
 	double operator () (const TableView<Label> &positive, const TableView<Label> &negative) {
+		std::unordered_set<Label> labels;
+
 		std::unordered_map<Label, size_t> positiveLabelCount;
 		for (const auto &label : positive) {
 			++positiveLabelCount[label];
+			labels.insert(label);
 		}
 
 		std::unordered_map<Label, size_t> negativeLabelCount;
 		for (const auto &label : negative) {
 			++negativeLabelCount[label];
+			labels.insert(label);
 		}
 
 		size_t samplesNumber = positive.rowsNumber() + negative.rowsNumber();

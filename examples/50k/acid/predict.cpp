@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 	typedef vector<string> Row;
 	typedef string Label;
 
-	TreeClassifier<ID3Trainer<Row, Label>> classifier{ID3Trainer<Row, Label>()};
+	TreeClassifier<ID3Trainer<Row, Label>> classifier{ID3Trainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>())};
 	classifier.train(trainSamplesString, trainLabels);
 
 	return 0;
