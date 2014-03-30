@@ -2,6 +2,7 @@
 #define KFOLD_HPP
 
 #include <stdexcept>
+#include <cassert>
 
 namespace faml {
 

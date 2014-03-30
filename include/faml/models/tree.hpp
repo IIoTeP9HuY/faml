@@ -22,6 +22,7 @@ public:
 		tree = std::unique_ptr<Tree>(new Tree(trainer.train(samples, labels)));
 	}
 
+	using Predictor<Row, Label>::predict;
 	Label predict(const Row &sample) {
 		typename Tree::Node currentNode;
 		while (!tree->isLeaf(currentNode)) {

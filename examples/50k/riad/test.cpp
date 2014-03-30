@@ -12,24 +12,22 @@
 using namespace std;
 using namespace faml;
 int main(int argc, char** argv) {
-	if(argc < 3) {
-		cerr << "usage: " << argv[0] << " train test";
+	if(argc < 2) {
+		cerr << "usage: " << argv[0] << " filename";
 		exit(1);
 	}
 
-	auto data = readCSV(argv[1]);
-	auto test = readCSV(argv[2]);
+	string file = argv[1];
+	auto data = readCSV(file);
 	Table<vector<string>> x, _y;
 	std::tie(x, _y) = data.splitOnColumns({"50k"});
 	auto y = _y.cast(firstElement<vector<string>>);
 	typedef vector<string> Row;
 	typedef string Label;
 	auto predictor = std::make_shared<TreeClassifier<ID3Trainer<Row, Label>>>(ID3Trainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>()));
-	predictor->train(x, y);
-	auto prediction = predictor->predict(test);
-	cout << "Id,Solution\n";
-	for(size_t i = 0; i < prediction.rowsNumber(); ++i) {
-		cout << (i + 1) << "," << prediction[i] << "\n";
-	}
+
+	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), 0.5, 10), AccuracyScorer<Label>());
+
+
 	return 0;
 }

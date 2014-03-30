@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 #include <set>
+#include <iostream>
+#include <iomanip>
 
 #include "faml/data/table.hpp"
 
