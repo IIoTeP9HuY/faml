@@ -1,6 +1,7 @@
 #ifndef ITERATOR_HPP
 #define ITERATOR_HPP
 
+#include <memory>
 namespace faml {
 
 template<typename BaseIterator>

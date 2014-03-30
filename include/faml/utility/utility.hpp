@@ -1,11 +1,14 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+#include <stdexcept>
+#include <map>
+#include <type_traits>
 namespace faml {
 
 template<typename T, typename U> 
 struct bySecond {
-	bool operator (const std::pair<T, U>& lhs, const std::pair<T, U>& rhs) const {
+	bool operator ()(const std::pair<T, U>& lhs, const std::pair<T, U>& rhs) const {
 		return lhs.second < rhs.second;
 	}
 };
@@ -13,9 +16,9 @@ struct bySecond {
 template <typename Row>
 Row majorantClass(const TableView<Row>& y) {
 	if(y.rowsNumber() == 0) {
-		throw invalid_argument("Empty table");
+		throw std::invalid_argument("Empty table");
 	}
-	map<Row, size_t> counter;
+	std::map<Row, size_t> counter;
 	for(const auto& row: y) {
 		++counter[row];
 	}
@@ -23,7 +26,7 @@ Row majorantClass(const TableView<Row>& y) {
 }
 
 template <typename Row>
-auto firstElement(const Row& row) -> decltype(row[0]) {
+auto firstElement(const Row& row) -> typename std::decay<decltype(row[0])>::type {
 	return row[0];
 }
 
