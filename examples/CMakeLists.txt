@@ -1,1 +1,2 @@
 add_subdirectory(digits_recognition)
+add_subdirectory(50k)

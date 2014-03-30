@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace faml {
@@ -106,6 +107,15 @@ std::pair< Table<RowType>, Table<RowType> > TableView<RowType>::splitOnColumns(c
 	}
 
 	return std::make_pair(notMatchedTable, matchedTable);
+}
+
+template<typename RowType>
+std::vector<RowType> TableView<RowType>::uniqueRowValues() const {
+	std::unordered_set<RowType> values;
+	for (const auto &value : *this) {
+		values.insert(value);
+	}
+	return std::vector<RowType> (values.begin(), values.end());
 }
 
 } // namespace faml

@@ -9,9 +9,6 @@ add_definitions(-fopenmp)
 
 set(BUILD_EXAMPLES TRUE)
 
-set(EXECUTABLE_OUTPUT_PATH bin)
-set(LIBRARY_OUTPUT_PATH lib)
-
 file(GLOB_RECURSE HEADERS ${PROJECT_SOURCE_DIR}/include/faml/*.hpp)
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
