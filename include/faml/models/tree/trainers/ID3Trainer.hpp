@@ -10,6 +10,7 @@
 #include "faml/statistics/informativity_criteria.hpp"
 #include "faml/utility/utility.hpp"
 
+#include <iostream>
 namespace faml {
 
 template<typename Row, typename T = typename std::decay<decltype(std::declval<Row>()[0])>::type>
@@ -38,12 +39,14 @@ public:
 	}
 	TrainedTree train(const TableView<Row>& x, const TableView<Label>& y) {
 		TrainedTree tree;
+		tree.newNode();
 		train(x, y, tree, 0);
 		return tree;
 	}
 
 private:
 	void train(const TableView<Row>& x, const TableView<Label>& y, TrainedTree &tree, size_t node) {
+		std::cerr << x.rowsNumber() << ' ' << y.rowsNumber() << ' ' << node << std::endl;
 		typedef typename std::decay<decltype(x[0][0])>::type T;
 		int size = x.columnsNumber();
 		bool split = false;
@@ -70,6 +73,7 @@ private:
 				}
 			}
 		}
+		std::cerr << "here";
 		if(split) {
 			size_t l = tree.newNode();
 			size_t r = tree.newNode();

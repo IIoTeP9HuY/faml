@@ -23,5 +23,7 @@ int main(int argc, char** argv) {
 	typedef string Label;
 	auto predictor = TreeClassifier<ID3Trainer<Row, Label>>(ID3Trainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>()));
 
+	predictor.train(x, y);
+
 	return 0;
 }
