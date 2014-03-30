@@ -9,8 +9,8 @@
 namespace faml {
 
 template<typename Label>
-struct InformationCriteria {
-	InformationCriteria(const std::vector<Label> &labels): labels(labels) {}
+struct InformativityCriteria {
+	InformativityCriteria(const std::vector<Label> &labels): labels(labels) {}
 	virtual ~VariationIndex() {}
 
 	virtual double operator () (const TableView<Label> &positive, const TableView<Label> &negative) = 0;
@@ -19,11 +19,11 @@ struct InformationCriteria {
 };
 
 template<typename Label>
-struct EntoropyCriteria : public InformationCriteria<Label> {
-	EntoropyCriteria(const std::vector<Label> &labels): InformationCriteria<Label> (labels) {}
+struct EntoropyCriteria : public InformativityCriteria<Label> {
+	EntoropyCriteria(const std::vector<Label> &labels): InformativityCriteria<Label> (labels) {}
 	~EntoropyCriteria() {}
 
-	using InformationCriteria<Label>::labels;
+	using InformativityCriteria<Label>::labels;
 
 	inline double h(double x) const {
 		if (x == 0) {
