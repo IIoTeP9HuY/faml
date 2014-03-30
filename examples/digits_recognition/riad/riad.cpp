@@ -143,14 +143,14 @@ int main() {
 	auto subtestY = trainY[indicies.second];
 
 
-	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	std::vector<std::shared_ptr<KernelFunction>> kernels;
 	kernels.emplace_back(new QuarticKernel());
 	//kernels.emplace_back(new DiscreteKernel());
 	//kernels.emplace_back(new InverseKernel());
 	//kernels.emplace_back(new RBFKernel(1.0));
 	//kernels.emplace_back(new EpanechnikovKernel());
 
-	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
 	//distances.emplace_back(new EuclidianDistance());
 	//distances.emplace_back(new MinkowskiDistance(3));
 	//distances.emplace_back(new MinkowskiDistance(5));
@@ -168,8 +168,8 @@ int main() {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
 					clock_t start = clock();
-					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
-					double res = crossValidate(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 5), AccuracyScorer<Label>());
+					auto knn = std::make_shared< KNNClassifier<SampleType, Label> >(k, distance, kernel);
+					double res = crossValidate<SampleType, Label>(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 5), AccuracyScorer<Label>());
 					cout << k << ' ' <<distance->toString() << ' ' << kernel->toString() << "\n";
 					cout << "Score: " << res << "\n";
 					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;

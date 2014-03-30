@@ -244,14 +244,14 @@ int main(int argc, char **argv) {
 //	scalers.emplace_back(new NormalScaler());
 //	scalers.emplace_back(new MinMaxScaler(trainSamples.columnsNumber(), 0, 1));
 
-	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
 	distances.emplace_back(new EuclidianDistance());
 //	distances.emplace_back(new MinkowskiDistance(3.0));
 //	distances.emplace_back(new MinkowskiDistance(5.0));
 	distances.emplace_back(new CosineDistance());
 //	distances.emplace_back(new OverlapDistance());
 
-	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	std::vector<std::shared_ptr<KernelFunction>> kernels;
 //	kernels.emplace_back(new RBFKernel(1.0));
 //	kernels.emplace_back(new RBFKernel(4.0));
 //	kernels.emplace_back(new InverseKernel());
@@ -267,11 +267,9 @@ int main(int argc, char **argv) {
 		for (const auto &distance : distances) {
 			for (const auto &kernel : kernels) {
 				for (size_t K = 1; K < 20; ++K) {
-					KNNClassifier<sampleType, labelType> classifier(K, *distance, *kernel);
-					classifier.train(trainSamplesScaled, trainLabels);
-
-					double accuracy = crossValidate(classifier, trainSamplesScaled, trainLabels, KFold(trainSamples.rowsNumber(), 20), AccuracyScorer<labelType>());
-//					double accuracy = crossValidate(classifier, trainSamplesScaled, trainLabels, ShuffleSplit(trainSamples.rowsNumber(), 0.05, 4), AccuracyScorer<labelType>());
+					auto knn = std::make_shared< KNNClassifier<sampleType, labelType> >(K, distance, kernel);
+					double accuracy = crossValidate<sampleType, labelType>(knn, trainSamplesScaled, trainLabels, KFold(trainSamples.rowsNumber(), 20), AccuracyScorer<labelType>());
+//					double accuracy = crossValidate<sampleType, labelType>(knn, trainSamplesScaled, trainLabels, ShuffleSplit(trainSamples.rowsNumber(), 0.05, 4), AccuracyScorer<labelType>());
 					std::cout << "Accuracy: " << accuracy << std::endl;
 					std::cout << "(K: " << K << "; " << scaler->toString() << "; "
 							  << distance->toString() <<  "; " << kernel->toString() << ")" << std::endl << std::endl;
@@ -292,9 +290,7 @@ int main(int argc, char **argv) {
 //			sample = normalScaler(sample);
 //		}
 
-		CosineDistance cosineDistance;
-		QuarticKernel quarticKernel;
-		KNNClassifier<sampleType, labelType> classifier(13, cosineDistance, quarticKernel);
+		KNNClassifier<sampleType, labelType> classifier(13, std::make_shared<CosineDistance>(), std::make_shared<QuarticKernel>());
 		classifier.train(trainSamples, trainLabels);
 		Table<labelType> trainLabelsTestPrediction = classifier.predict(testSamples);
 		printPrediction("predictions.csv", trainLabelsTestPrediction);

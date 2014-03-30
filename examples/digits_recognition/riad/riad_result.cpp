@@ -84,20 +84,20 @@ int main() {
 	trainXstr.clear();
 	trainYstr.clear();
 
-	std::vector<std::unique_ptr<Scaler<VectorXf>>> scalers;
+	std::vector<std::shared_ptr<Scaler<VectorXf>>> scalers;
 	scalers.emplace_back(new DummyScaler<VectorXf>());
 //	scalers.emplace_back(new PowerAmplifyScaler(1.4));
 	//scalers.emplace_back(new NormalScaler());
 	//scalers.emplace_back(new MinMaxScaler(columns.size(), 0, 1));
 
-	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	std::vector<std::shared_ptr<KernelFunction>> kernels;
 	kernels.emplace_back(new QuarticKernel());
 	//	kernels.emplace_back(new DiscreteKernel());
 	// kernels.emplace_back(new InverseKernel());
 	//kernels.emplace_back(new RBFKernel(1.0));
 	//kernels.emplace_back(new EpanechnikovKernel());
 
-	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
 //	distances.emplace_back(new EuclidianDistance());
 //	distances.emplace_back(new MinkowskiDistance(3));
 //	distances.emplace_back(new MinkowskiDistance(5));
@@ -114,7 +114,7 @@ int main() {
 		for(size_t k = 12; k <= 12; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
-					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
+					KNNClassifier<VectorXf, Label> knn(k, distance, kernel);
 					knn.train(trainX, trainY);
 					auto prediction = knn.predict(test);
 					cout << "Id,Prediction" << "\n";
