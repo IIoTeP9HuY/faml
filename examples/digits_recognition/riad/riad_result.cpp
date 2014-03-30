@@ -86,31 +86,13 @@ int main() {
 
 	std::vector<std::shared_ptr<Scaler<VectorXf>>> scalers;
 	scalers.emplace_back(new DummyScaler<VectorXf>());
-//	scalers.emplace_back(new PowerAmplifyScaler(1.4));
-	//scalers.emplace_back(new NormalScaler());
-	//scalers.emplace_back(new MinMaxScaler(columns.size(), 0, 1));
 
 	std::vector<std::shared_ptr<KernelFunction>> kernels;
 	kernels.emplace_back(new QuarticKernel());
-	//	kernels.emplace_back(new DiscreteKernel());
-	// kernels.emplace_back(new InverseKernel());
-	//kernels.emplace_back(new RBFKernel(1.0));
-	//kernels.emplace_back(new EpanechnikovKernel());
 
 	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
-//	distances.emplace_back(new EuclidianDistance());
-//	distances.emplace_back(new MinkowskiDistance(3));
-//	distances.emplace_back(new MinkowskiDistance(5));
 	distances.emplace_back(new CosineDistance());
-//	distances.emplace_back(new OverlapDistance());
 
-	//for(const auto& scaler: scalers) {
-	//	scaler->train(trainX);
-	//	auto lambda = [&scaler](const VectorXf& row) {
-	//		return (*scaler)(row);
-	//	};
-		//auto scaledX = trainX.cast(lambda);
-		//auto scaledTest = test.cast(lambda);
 		for(size_t k = 12; k <= 12; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
@@ -121,14 +103,9 @@ int main() {
 					for(size_t i = 0; i < prediction.rowsNumber(); ++i) {
 						cout << i + 1 << "," << prediction[i] << "\n";
 					}
-//					cout << k << ' ' << scaler->toString() << ' ' << distance->toString() << ' ' << kernel->toString() << "\n";
-//				cout << "Score: " << accuracyScore(subtestY, prediction) << "\n";
-//					cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;
-//					cout << endl;
 				}
 			}
 		}
-	//}
 
 	return 0;
 }
