@@ -46,7 +46,10 @@ public:
 
 private:
 	void train(const TableView<Row>& x, const TableView<Label>& y, TrainedTree &tree, size_t node) {
-		std::cerr << x.rowsNumber() << ' ' << y.rowsNumber() << ' ' << node << std::endl;
+		if (x.rowsNumber() != y.rowsNumber()) {
+			throw std::invalid_argument("x.rowsNumber() != y.rowsNumber()");
+		}
+
 		typedef typename std::decay<decltype(x[0][0])>::type T;
 		int size = x.columnsNumber();
 		bool split = false;
@@ -58,11 +61,14 @@ private:
 			for(size_t row = 0; row < x.rowsNumber(); ++row) {
 				valueIndices[x[row][i]].push_back(row);
 			}
+			if (valueIndices.size() > 10) {
+				continue;
+			}
 			for(const auto& col : valueIndices) {
 				if(col.second.size() == x.rowsNumber()) {
 					continue;
 				}
-				auto others = otherIndices(col.second, size);
+				auto others = otherIndices(col.second, x.rowsNumber());
 				double informativity = (*criteria)(y[col.second], y[others]);
 				if(informativity > bestInformativity) {
 					split = true;
@@ -73,7 +79,6 @@ private:
 				}
 			}
 		}
-		std::cerr << "here";
 		if(split) {
 			size_t l = tree.newNode();
 			size_t r = tree.newNode();

@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <cmath>
+#include <iostream>
 
 #include "variation_indices.hpp"
 
@@ -54,10 +55,10 @@ struct EntropyCriteria : public InformativityCriteria<Label> {
 
 			entropy += h(classSize * 1.0 / samplesNumber);
 			if (positive.rowsNumber()) {
-				entropy -= positivePart * h(positiveClassSize / positive.rowsNumber());
+				entropy -= positivePart * h(positiveClassSize * 1.0 / positive.rowsNumber());
 			}
 			if (negative.rowsNumber()) {
-				entropy -= negativePart * h(negativeClassSize / negative.rowsNumber());
+				entropy -= negativePart * h(negativeClassSize * 1.0 / negative.rowsNumber());
 			}
 		}
 		return entropy;
