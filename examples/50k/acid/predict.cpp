@@ -9,7 +9,8 @@
 
 #include "faml/io.hpp"
 #include "faml/data/table.hpp"
-#include "faml/statistics/variation_indices.hpp"
+#include "faml/models/tree.hpp"
+#include "faml/models/tree/trainers/ID3Trainer.hpp"
 
 using namespace faml;
 using namespace std;
@@ -32,9 +33,6 @@ int main(int argc, char **argv) {
 										return sample[0];
 									}
 								 ));
-
-	GiniIndex<string> giniIndex{trainLabels.uniqueRowValues()};
-	cerr << "Gini index: " << giniIndex(trainLabels) << endl;
 
 	return 0;
 }
