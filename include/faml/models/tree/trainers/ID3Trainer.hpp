@@ -2,53 +2,61 @@
 #define ID3TRAINER_HPP
 
 #include <limits>
+#include <unordered_map>
+#include <type_traits>
 
 #include "faml/models/tree/tree.hpp"
 #include "faml/statistics/informativity_criteria.hpp"
+#include "faml/utility/utility.hpp"
 
 namespace faml {
 
-template<typename Row, typename T = decltype(declval<Row>()[0])>
+template<typename Row, typename T = typename std::decay<decltype(std::declval<Row>()[0])>::type>
 struct ID3Node {
 	size_t l, r;
 	size_t index;
 	T value;
+	ID3Node(size_t l, size_t r, size_t index, const T& value): l(l), r(r), index(index), value(value) {
+
+	}
+
 	size_t nextNode(const Row& row) const {
 		return row[index] == value ? l : r;
 	}
 };
 
-template<typename Row, typename Label>
+template<typename _Row, typename _Label>
 class ID3Trainer {
 public:
-	typedef Row Row;
-	typedef Label Label;
+	typedef _Row Row;
+	typedef _Label Label;
+	typedef Tree<ID3Node<Row>, Label> TrainedTree;
 
-	Tree<ID3Node<Row>, Label> train(const TableView<Row>& x, const TableView<Label>& y) {
-		Tree<ID3Node<Row>, Label> tree;
-		train(x, y, 0);
+	TrainedTree train(const TableView<Row>& x, const TableView<Label>& y) {
+		TrainedTree tree;
+		train(x, y, tree, 0);
 		return tree;
 	}
 
 private:
-	void train(const TableView<Row>& x, const TableView<Label>& y, size_t node) { 
-		typedef decltype(x[0]) T;
+	void train(const TableView<Row>& x, const TableView<Label>& y, TrainedTree &tree, size_t node) {
+		typedef typename std::decay<decltype(x[0][0])>::type T;
 		int size = x.columnsNumber();
 		bool split = false;
 		double bestInformativity = std::numeric_limits<double>::min();
 		double bestIndex;
-		vector<size_t> bestIndices, bestOtherIndices;
+		std::vector<size_t> bestIndices, bestOtherIndices;
 		for(size_t i = 0; i < size; ++i) {
-			std::map<T, vector<size_t>> valueIndices;
+			std::unordered_map<T, std::vector<size_t>> valueIndices;
 			for(size_t row = 0; row < x.rowsNumber(); ++row) {
-				valueIndices[x[row]].push_back(row);
+				valueIndices[x[row][i]].push_back(row);
 			}
 			for(const auto& col : valueIndices) {
-				if(col.valueIndices.size() == x.rowsNumber()) {
+				if(col.second.size() == x.rowsNumber()) {
 					continue;
 				}
 				auto others = otherIndices(col.second, size);
-				double informativity = criteria(y[col.second], y[others]);
+				double informativity = (*criteria)(y[col.second], y[others]);
 				if(informativity > bestInformativity) {
 					split = true;
 					bestInformativity = informativity;
@@ -61,10 +69,10 @@ private:
 		if(split) {
 			size_t l = tree.newNode();
 			size_t r = tree.newNode();
-			ID3Node currentNode(l, r, bestIndex, x[bestIndicies[0]][bestIndex]);
+			ID3Node<Row> currentNode(l, r, bestIndex, x[bestIndices[0]][bestIndex]);
 			tree.setInnerNode(node, currentNode);
-			train(x[bestIndices], y[bestIndices], l);
-			train(x[bestOtherIndicies], y[bestOtherIndices], r);
+			train(x[bestIndices], y[bestIndices], tree, l);
+			train(x[bestOtherIndices], y[bestOtherIndices], tree, r);
 		}
 		else {
 			tree.setLeaf(node, majorantClass(y));
@@ -72,7 +80,7 @@ private:
 	}
 
 private:
-	std::vector<size_t> otherInices (const std::vector<size_t>& valueIndices, size_t size) {
+	std::vector<size_t> otherIndices (const std::vector<size_t>& valueIndices, size_t size) {
 		std::vector<size_t> result;
 		size_t pos;
 		for(size_t i = 0; i < size; ++i) {
@@ -85,7 +93,7 @@ private:
 		return result;
 	}
 
-	std::shared_ptr<InformativityCriteria> criteria;
+	std::shared_ptr<InformativityCriteria<Label>> criteria;
 };
 
 } // namespace faml

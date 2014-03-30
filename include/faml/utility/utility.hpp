@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <map>
 #include <type_traits>
+#include <algorithm>
+
 namespace faml {
 
 template<typename T, typename U> 
@@ -22,7 +24,7 @@ Row majorantClass(const TableView<Row>& y) {
 	for(const auto& row: y) {
 		++counter[row];
 	}
-	return max_element(counter.begin(), counter.end(), bySecond<Row, size_t>())->first;
+	return std::max_element(counter.begin(), counter.end(), bySecond<Row, size_t>())->first;
 }
 
 template <typename Row>
@@ -30,6 +32,6 @@ auto firstElement(const Row& row) -> typename std::decay<decltype(row[0])>::type
 	return row[0];
 }
 
-} // faml
+} // namespace faml
 
-#endif
+#endif // UTILITY_HPP

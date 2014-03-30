@@ -1,5 +1,5 @@
-#ifndef TREE_HPP
-#define TREE_HPP
+#ifndef TREE_TREE_HPP
+#define TREE_TREE_HPP
 
 namespace faml {
 
@@ -31,7 +31,7 @@ public:
 
 	void setInnerNode(Node node, const Inner& inner) {
 		inners[node] = std::unique_ptr<Inner>(new Inner(inner));
-		leafs[nodex] = nullptr;
+		leafs[node] = nullptr;
 	}
 
 	size_t newNode() {
@@ -44,4 +44,4 @@ public:
 
 } // namespace faml
 
-#endif // TREE_HPP
+#endif // TREE_TREE_HPP

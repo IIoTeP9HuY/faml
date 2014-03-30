@@ -11,7 +11,7 @@ namespace faml {
 template<typename Label>
 struct InformativityCriteria {
 	InformativityCriteria(const std::vector<Label> &labels): labels(labels) {}
-	virtual ~VariationIndex() {}
+	virtual ~InformativityCriteria() {}
 
 	virtual double operator () (const TableView<Label> &positive, const TableView<Label> &negative) = 0;
 
@@ -51,7 +51,7 @@ struct EntoropyCriteria : public InformativityCriteria<Label> {
 		for (const auto &label : labels) {
 			size_t positiveClassSize = positiveLabelCount[label];
 			size_t negativeClassSize = negativeLabelCount[label];
-			size_t classSize = positiveSize + negativeSize;
+			size_t classSize = positiveClassSize + negativeClassSize;
 
 			entropy += h(classSize * 1.0 / samplesNumber);
 			if (positive.rowsNumber()) {

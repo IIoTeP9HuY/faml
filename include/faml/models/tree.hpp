@@ -12,13 +12,14 @@ class TreeClassifier : public Predictor<typename Trainer::Row, typename Trainer:
 public:
 	typedef typename Trainer::Row Row;
 	typedef typename Trainer::Label Label;
-	typedef decltype(std::declval<Trainer>().train(std::declval<Row>(), std::declval<Label>())) Tree;
+	typedef decltype(std::declval<Trainer>().train(std::declval<TableView<Row>>(),
+												   std::declval<TableView<Label>>())) Tree;
 
 	TreeClassifier(const Trainer &trainer): trainer(trainer) {
 	}
 
-	void train() {
-		tree = std::unique_ptr<Tree>(new Tree(trainer.train()));
+	void train(const TableView<Row> &samples, const TableView<Label> &labels) {
+		tree = std::unique_ptr<Tree>(new Tree(trainer.train(samples, labels)));
 	}
 
 	Label predict(const Row &sample) {
