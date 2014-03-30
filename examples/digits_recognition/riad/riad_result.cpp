@@ -84,19 +84,19 @@ int main() {
 	trainXstr.clear();
 	trainYstr.clear();
 
-	std::vector<std::unique_ptr<Scaler<VectorXf>>> scalers;
+	std::vector<std::shared_ptr<Scaler<VectorXf>>> scalers;
 	scalers.emplace_back(new DummyScaler<VectorXf>());
 
-	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	std::vector<std::shared_ptr<KernelFunction>> kernels;
 	kernels.emplace_back(new QuarticKernel());
 
-	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
 	distances.emplace_back(new CosineDistance());
 
 		for(size_t k = 12; k <= 12; ++k) {
 			for(const auto& distance: distances) {
 				for(const auto& kernel: kernels) {
-					KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
+					KNNClassifier<VectorXf, Label> knn(k, distance, kernel);
 					knn.train(trainX, trainY);
 					auto prediction = knn.predict(test);
 					cout << "Id,Prediction" << "\n";

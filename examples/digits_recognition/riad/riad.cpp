@@ -99,18 +99,18 @@ int main() {
 	auto subtestY = trainY[indicies.second];
 
 
-	std::vector<std::unique_ptr<KernelFunction>> kernels;
+	std::vector<std::shared_ptr<KernelFunction>> kernels;
 	kernels.emplace_back(new QuarticKernel());
 
-	std::vector<std::unique_ptr<DistanceFunction<VectorXf>>> distances;
+	std::vector<std::shared_ptr<DistanceFunction<VectorXf>>> distances;
 	distances.emplace_back(new CosineDistance());
 
 	for(size_t k = 1; k <= 20; ++k) {
 		for(const auto& distance: distances) {
 			for(const auto& kernel: kernels) {
 				clock_t start = clock();
-				KNNClassifier<VectorXf, Label> knn(k, *distance, *kernel);
-				double res = crossValidate(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 5), AccuracyScorer<Label>());
+				auto knn = std::make_shared< KNNClassifier<SampleType, Label> >(k, distance, kernel);
+				double res = crossValidate<SampleType, Label>(knn, subtrainX, subtrainY, KFold(subtrainX.rowsNumber(), 5), AccuracyScorer<Label>());
 				cout << k << ' ' <<distance->toString() << ' ' << kernel->toString() << "\n";
 				cout << "Score: " << res << "\n";
 				cout << "time " << (clock() - start) / 1.0 / CLOCKS_PER_SEC;

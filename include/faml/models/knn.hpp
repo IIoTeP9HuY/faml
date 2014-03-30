@@ -14,7 +14,8 @@ namespace faml {
 template<typename DataType, typename LabelType>
 class KNNClassifier : public Predictor<DataType, LabelType> {
 public:
-	KNNClassifier(size_t K, const DistanceFunction<DataType> &dist, const KernelFunction &kernel): K(K), dist(dist), kernel(kernel) {
+	KNNClassifier(size_t K, std::shared_ptr< DistanceFunction<DataType> > dist, std::shared_ptr<KernelFunction> kernel):
+		K(K), dist(std::move(dist)), kernel(std::move(kernel)) {
 		if (K == 0) {
 			throw std::invalid_argument("K must be non-zero");
 		}
@@ -32,7 +33,7 @@ public:
 
 		std::priority_queue< std::pair<double, size_t> > nearestNeighbors;
 		for (size_t i = 0; i < baseSamples.rowsNumber(); ++i) {
-			double distance = dist(sample, baseSamples[i]);
+			double distance = (*dist)(sample, baseSamples[i]);
 			nearestNeighbors.push(std::make_pair(distance, i));
 			if (nearestNeighbors.size() > K) {
 				nearestNeighbors.pop();
@@ -46,7 +47,7 @@ public:
 			std::pair<double, size_t> neighbor = nearestNeighbors.top();
 			nearestNeighbors.pop();
 			neighbor.first /= maxDistance;
-			labelWeight[baseLabels[neighbor.second]] += kernel(neighbor.first);
+			labelWeight[baseLabels[neighbor.second]] += (*kernel)(neighbor.first);
 		}
 
 		return std::max_element(labelWeight.begin(), labelWeight.end(), labelWeightPairComparator)->first;
@@ -72,8 +73,8 @@ private:
 	}
 
 	size_t K;
-	const DistanceFunction<DataType> &dist;
-	const KernelFunction &kernel;
+	std::shared_ptr< DistanceFunction<DataType> > dist;
+	std::shared_ptr<KernelFunction> kernel;
 	Table<DataType> baseSamples;
 	Table<LabelType> baseLabels;
 };

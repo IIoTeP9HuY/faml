@@ -54,7 +54,7 @@ private:
 			size_t l = tree.newNode();
 			size_t r = tree.newNode();
 			ID3Node currentNode(l, r, bestIndex, x[bestIndicies[0]][bestIndex]);
-			tree.setInnerNode(node currentNode);
+			tree.setInnerNode(node, currentNode);
 			train(x[bestIndices], y[bestIndices], l);
 			train(x[bestOtherIndicies], y[bestOtherIndices], r);
 		}

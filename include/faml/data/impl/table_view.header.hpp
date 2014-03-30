@@ -55,6 +55,8 @@ public:
 
 	std::pair< Table<RowType>, Table<RowType> > splitOnColumns(const std::vector<std::string> &splitColumnsNames) const;
 
+	std::vector<RowType> uniqueRowValues() const;
+
 	virtual const std::vector<std::string>& columnsNames() const  = 0;
 };
 
