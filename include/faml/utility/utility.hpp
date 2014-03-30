@@ -22,6 +22,11 @@ Row majorantClass(const TableView<Row>& y) {
 	return max_element(counter.begin(), counter.end(), bySecond<Row, size_t>())->first;
 }
 
+template <typename Row>
+auto firstElement(const Row& row) -> decltype(row[0]) {
+	return row[0];
+}
+
 } // faml
 
 #endif
