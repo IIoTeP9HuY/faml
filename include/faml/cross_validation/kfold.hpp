@@ -78,4 +78,5 @@ private:
 };
 
 } // namespace faml
-#endif //KFOLD_HPP
+
+#endif // KFOLD_HPP

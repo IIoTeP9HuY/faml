@@ -1,5 +1,6 @@
 #ifndef CROSS_VALIDATION_HPP
 #define CROSS_VALIDATION_HPP
+
 #include "faml/models/predictor.hpp"
 
 namespace faml {
@@ -15,4 +16,5 @@ auto crossValidate(std::shared_ptr< Predictor<Row, Label> > predictor, const Tab
 }
 
 } //namespace faml
-#endif //CROSS_VALIDATION_HPP
+
+#endif // CROSS_VALIDATION_HPP

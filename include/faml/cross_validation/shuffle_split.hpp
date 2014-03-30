@@ -73,4 +73,5 @@ std::pair<std::vector<size_t>, std::vector<size_t>> trainTestSplit(
 
 
 } // namespace faml
-#endif //SHUFFLESPLIT_HPP
+
+#endif // SHUFFLESPLIT_HPP

@@ -1,8 +1,10 @@
 #ifndef PREDICTOR_HPP
 #define PREDICTOR_HPP
+
 #include "faml/data/table.hpp"
 
 namespace faml {
+
 template <typename Row, typename Label>
 class Predictor {
 public:
@@ -14,4 +16,5 @@ public:
 };
 
 } // namespace faml
-#endif
+
+#endif // PREDICTOR_HPP

@@ -42,6 +42,6 @@ public:
 	}
 };
 
-} // faml
+} // namespace faml
 
-#endif //TREE_HPP
+#endif // TREE_HPP

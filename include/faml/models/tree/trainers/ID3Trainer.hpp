@@ -1,7 +1,11 @@
-#ifndef ID3Trainer
-#define ID3Trainer
-#include "faml/models/tree/tree.hpp"
+#ifndef ID3TRAINER_HPP
+#define ID3TRAINER_HPP
+
 #include <limits>
+
+#include "faml/models/tree/tree.hpp"
+#include "faml/statistics/informativity_criteria.hpp"
+
 namespace faml {
 
 template<typename Row, typename T = decltype(declval<Row>()[0])>
@@ -80,6 +84,6 @@ private:
 	std::shared_ptr<InformativityCriteria> criteria;
 };
 
-} //faml
+} // namespace faml
 
-#endif
+#endif // ID3TRAINER_HPP
