@@ -61,7 +61,7 @@ private:
 			for(size_t row = 0; row < x.rowsNumber(); ++row) {
 				valueIndices[x[row][i]].push_back(row);
 			}
-			if (valueIndices.size() > 10) {
+			if (valueIndices.size() > 20) {
 				continue;
 			}
 			for(const auto& col : valueIndices) {
