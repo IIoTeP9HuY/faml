@@ -24,7 +24,7 @@ public:
 
 	using Predictor<Row, Label>::predict;
 	Label predict(const Row &sample) {
-		typename Tree::Node currentNode;
+		typename Tree::Node currentNode = tree.root;
 		while (!tree->isLeaf(currentNode)) {
 			currentNode = tree->getAsInner(currentNode).nextNode(sample);
 		}

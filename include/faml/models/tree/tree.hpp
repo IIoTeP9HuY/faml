@@ -12,6 +12,7 @@ private:
 	std::vector<std::unique_ptr<Leaf>> leafs;
 
 public:
+
 	bool isLeaf(Node node) const {
 		return leafs[node] != nullptr;
 	}
@@ -40,6 +41,7 @@ public:
 		leafs.emplace_back(nullptr);
 		return res;
 	}
+	size_t root = 0;
 };
 
 } // namespace faml
