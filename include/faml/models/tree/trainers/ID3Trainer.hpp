@@ -10,6 +10,8 @@
 #include "faml/statistics/informativity_criteria.hpp"
 #include "faml/utility/utility.hpp"
 
+#include <cassert>
+#include <stdexcept>
 #include <iostream>
 namespace faml {
 
@@ -94,8 +96,10 @@ private:
 
 private:
 	std::vector<size_t> otherIndices (const std::vector<size_t>& valueIndices, size_t size) {
+		assert(valueIndices.empty() || valueIndices.back() < size);
+		assert(std::is_sorted(valueIndices.begin(), valueIndices.end()));
 		std::vector<size_t> result;
-		size_t pos;
+		size_t pos = 0;
 		for(size_t i = 0; i < size; ++i) {
 			if(pos != valueIndices.size() && valueIndices[pos] == i) {
 				++pos;

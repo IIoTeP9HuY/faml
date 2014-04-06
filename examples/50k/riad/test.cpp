@@ -1,7 +1,7 @@
 #include "faml/io.hpp"
 #include "faml/utility/utility.hpp"
 #include "faml/models/tree.hpp"
-#include "faml/models/tree/trainers/ID3Trainer.hpp"
+#include "faml/models/tree/trainers/ID3PruningTrainer.hpp"
 #include "faml/statistics/informativity_criteria.hpp"
 #include "faml/cross_validation/cross_validation.hpp"
 #include "faml/cross_validation/shuffle_split.hpp"
@@ -9,6 +9,7 @@
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/data/merge.hpp"
 #include <vector>
+#include <limits>
 
 #include <iostream>
 using namespace std;
@@ -50,6 +51,16 @@ public:
 	};
 
 	virtual Row operator() (const Row& row) const {
+		/*if(row[column] == "?") {
+			return Row(borders.size() + 1, "?");
+		}
+		Row result(borders.size() + 1, "0");
+		double value = std::stod(row[column]);
+		for(size_t i = 0; i < borders.size(); ++i) {
+			result[lower_bound(borders.begin(), borders.end(), value) - borders.begin()] = "1";
+		}
+		return result;
+		*/
 		if(row[column] == "?") {
 			return Row(borders.size(), "?");
 		}
@@ -67,9 +78,13 @@ public:
 	virtual Table<Row> operator() (const TableView<Row>& data) const {
 		vector<string> features;
 		string name = data.columnsNames()[column];
+		double prev = -numeric_limits<double>::infinity();
 		for(double border: borders) {
+			//features.push_back(to_string(prev) + " < " + name + " < " + to_string(border));
 			features.push_back(name + " < " + to_string(border));
+			prev = border;
 		}
+//		features.push_back(to_string(prev) + " < " + name);
 		return data.cast(
 				[&](const Row& row) { return (*this)(row); },
 				features
@@ -95,10 +110,12 @@ int main(int argc, char** argv) {
 	Table<vector<string>> x, _y;
 	std::tie(x, _y) = data.splitOnColumns({"50k"});
 	auto y = _y.cast(firstElement<vector<string>>);
-	std::vector<std::shared_ptr<Discretizator<vector<string>>>> discs;
+	typedef vector<string> Row;
+	typedef string Label;
+/*	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
 	vector<size_t> columns = {0, 2, 4, 10, 11, 12};
 	for(auto column: columns) {
-		discs.push_back(make_shared<Discretizator<vector<string>>>(column, 10));
+		discs.push_back(make_shared<Discretizator<Row>>(column, 10));
 	}
 	for(const auto& disc: discs) {
 		disc->train(x);
@@ -107,12 +124,10 @@ int main(int argc, char** argv) {
 	cout << x.columnsNames().size() << ' ' << x[0].size() << endl;
 	for(string s: x.columnsNames()) {
 		cout << s << "\n";
-	}
-	typedef vector<string> Row;
-	typedef string Label;
-	auto predictor = std::make_shared<TreeClassifier<ID3Trainer<Row, Label>>>(ID3Trainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>()));
+	}*/
+	auto predictor = std::make_shared<TreeClassifier<ID3PruningTrainer<Row, Label>>>(ID3PruningTrainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>(), 0.7, 42));
 
-	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), 0.5, 10), AccuracyScorer<Label>());
+	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), (size_t)5000, 10), AccuracyScorer<Label>());
 
 
 	return 0;
