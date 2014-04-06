@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
+#include <stdexcept>
 namespace faml {
 
 template <typename RowType>

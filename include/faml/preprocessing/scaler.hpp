@@ -71,8 +71,8 @@ public:
 	MinMaxScaler(const DataType &lowerBound, const DataType &upperBound):
 		lowerBound(lowerBound), upperBound(upperBound) {}
 
-	MinMaxScaler(size_t n, double lowerBound, double upperBound): lowerBound(VectorXf::Ones(n) * lowerBound),
-	                                                              upperBound(VectorXf::Ones(n) * upperBound){
+	MinMaxScaler(size_t n, double lowerBound, double upperBound): lowerBound(Eigen::VectorXf::Ones(n) * lowerBound),
+	                                                              upperBound(Eigen::VectorXf::Ones(n) * upperBound){
 	}
 	virtual ~MinMaxScaler() {}
 
