@@ -26,8 +26,8 @@ public:
 		vector<double> values;
 		values.reserve(x.rowsNumber());
 		for(const auto& row: x) {
-			if(row[column] != "?")
-				values.push_back(std::stod(row[column]));
+			assert(row[column] != "?");
+			values.push_back(std::stod(row[column]));
 		}
 		sort(values.begin(), values.end());
 		for(int i = 1; i < C; ++i) {
@@ -62,7 +62,7 @@ public:
 		return result;
 		*/
 		if(row[column] == "?") {
-			return Row(borders.size(), "?");
+			assert(false);
 		}
 		Row result(borders.size(), "0");
 		double value = std::stod(row[column]);
@@ -112,10 +112,10 @@ int main(int argc, char** argv) {
 	auto y = _y.cast(firstElement<vector<string>>);
 	typedef vector<string> Row;
 	typedef string Label;
-/*	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
+	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
 	vector<size_t> columns = {0, 2, 4, 10, 11, 12};
 	for(auto column: columns) {
-		discs.push_back(make_shared<Discretizator<Row>>(column, 10));
+		discs.push_back(make_shared<Discretizator<Row>>(column, 5));
 	}
 	for(const auto& disc: discs) {
 		disc->train(x);
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 	cout << x.columnsNames().size() << ' ' << x[0].size() << endl;
 	for(string s: x.columnsNames()) {
 		cout << s << "\n";
-	}*/
+	}
 	auto predictor = std::make_shared<TreeClassifier<ID3PruningTrainer<Row, Label>>>(ID3PruningTrainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>(), 0.7, 42));
 
 	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), 0.5000, 10), AccuracyScorer<Label>());

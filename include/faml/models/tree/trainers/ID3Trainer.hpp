@@ -42,12 +42,13 @@ public:
 	TrainedTree train(const TableView<Row>& x, const TableView<Label>& y) {
 		TrainedTree tree;
 		tree.newNode();
-		train(x, y, tree, 0);
+		train(x, y, tree, 0, 0);
 		return tree;
 	}
 
 private:
-	void train(const TableView<Row>& x, const TableView<Label>& y, TrainedTree &tree, size_t node) {
+	void train(const TableView<Row>& x, const TableView<Label>& y, TrainedTree &tree, size_t node, size_t level) {
+
 		if (x.rowsNumber() != y.rowsNumber()) {
 			throw std::invalid_argument("x.rowsNumber() != y.rowsNumber()");
 		}
@@ -59,11 +60,13 @@ private:
 		double bestIndex;
 		std::vector<size_t> bestIndices, bestOtherIndices;
 		for(size_t i = 0; i < size; ++i) {
+			if(i == 1 || i == 6 || i == 13)
+				continue;
 			std::unordered_map<T, std::vector<size_t>> valueIndices;
 			for(size_t row = 0; row < x.rowsNumber(); ++row) {
 				valueIndices[x[row][i]].push_back(row);
 			}
-			if (valueIndices.size() > 20) {
+			if (valueIndices.size() > 30) {
 				continue;
 			}
 			valueIndices.erase("?");
@@ -87,8 +90,8 @@ private:
 			size_t r = tree.newNode();
 			ID3Node<Row> currentNode(l, r, bestIndex, x[bestIndices[0]][bestIndex]);
 			tree.setInnerNode(node, currentNode);
-			train(x[bestIndices], y[bestIndices], tree, l);
-			train(x[bestOtherIndices], y[bestOtherIndices], tree, r);
+			train(x[bestIndices], y[bestIndices], tree, l, level + 1);
+			train(x[bestOtherIndices], y[bestOtherIndices], tree, r, level + 1);
 		}
 		else {
 			tree.setLeaf(node, majorantClass(y));
