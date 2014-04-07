@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
 	vector<size_t> columns = {0, 2, 4, 10, 11, 12};
 	for(auto column: columns) {
-		discs.push_back(make_shared<Discretizator<Row>>(column, 5));
+		discs.push_back(make_shared<Discretizator<Row>>(column, 4));
 	}
 	for(const auto& disc: discs) {
 		disc->train(x);
