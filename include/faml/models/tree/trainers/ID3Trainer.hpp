@@ -66,6 +66,7 @@ private:
 			if (valueIndices.size() > 20) {
 				continue;
 			}
+			valueIndices.erase("?");
 			for(const auto& col : valueIndices) {
 				if(col.second.size() == x.rowsNumber()) {
 					continue;

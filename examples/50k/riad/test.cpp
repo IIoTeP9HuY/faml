@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 	}*/
 	auto predictor = std::make_shared<TreeClassifier<ID3PruningTrainer<Row, Label>>>(ID3PruningTrainer<Row, Label>(std::make_shared<EntropyCriteria<Label>>(), 0.7, 42));
 
-	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), (size_t)5000, 10), AccuracyScorer<Label>());
+	std::cout << crossValidate<Row, Label>(predictor, x, y, ShuffleSplit(x.rowsNumber(), 0.5000, 10), AccuracyScorer<Label>());
 
 
 	return 0;

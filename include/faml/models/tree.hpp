@@ -38,7 +38,12 @@ public:
 	}
 
 	void train(const TableView<Row> &samples, const TableView<Label> &labels) {
-		tree = std::unique_ptr<Tree>(new Tree(trainer.train(samples, labels)));
+		std::vector<size_t> ind;
+		for(int i = 0; i < samples.rowsNumber(); ++i) {
+	//		if(!bad(samples[i]))
+				ind.push_back(i);
+		}
+		tree = std::unique_ptr<Tree>(new Tree(trainer.train(samples[ind], labels[ind])));
 		assert(tree->root < tree->size());
 	}
 
@@ -46,9 +51,18 @@ public:
 	Label predict(const Row &sample) {
 		assert(tree != nullptr);
 		assert(tree->root < tree->size());
+//		if(bad(sample))
+//			return "<=50K";
 		return impl::predict<Label>(*tree, sample, tree->root);
 	}
-
+	bool bad(const Row& sample) const {
+		for(auto x: sample) {
+			if(x == "?") {
+				return true;
+			}
+		}
+		return false;
+	}
 private:
 	std::unique_ptr<Tree> tree;
 	Trainer trainer;
