@@ -24,8 +24,6 @@ using namespace std;
 using namespace faml;
 using namespace Eigen;
 
-const bool VERBOSE = false;
-
 /*
 template<typename DataType, typename LabelType>
 void removeOutliers(Table<DataType> *samples,

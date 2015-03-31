@@ -22,19 +22,19 @@ using namespace Eigen;
 int main() {
 	auto testData = readCSV("mnist_small_train.csv");
 	auto testStr = readCSV("mnist_test_no_label.csv");
-	typedef std::vector<std::string> StrRowType;
+	typedef vector<string> StrRowType;
 	typedef unsigned long long Label;
 	Table<StrRowType> trainXstr, trainYstr;
-	std::tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});
+	tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});
 	auto trainY = trainYstr.cast(
 		[](const StrRowType &sample) { 
-			return std::stoull(sample[0]); 
+			return stoull(sample[0]);
 		}
 	);
 
 	auto trainX = trainXstr.castByElement<VectorXf>(
-		[](const std::string& x) {
-			return std::stod(x);
+		[](const string& x) {
+			return stod(x);
 		}
 	);
 	cerr << "before" << endl;

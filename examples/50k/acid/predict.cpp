@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 	tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"50k"});
 
 	Table<string> trainLabels(trainLabelsString.cast(
-								 [](const std::vector<std::string> &sample) {
+								 [](const vector<string> &sample)->string {
 										return sample[0];
 									}
 								 ));

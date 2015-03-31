@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <stdint.h>
+#include <random>
 
 namespace faml {
 

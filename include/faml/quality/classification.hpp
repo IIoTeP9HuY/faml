@@ -3,7 +3,10 @@
 
 #include <stdexcept>
 #include <set>
+#include <vector>
+#include <unordered_map>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 #include "faml/data/table.hpp"
@@ -52,7 +55,7 @@ private:
 };
 
 template<typename LabelType>
-std::ostream operator << (std::ostream &os, const ConfusionMatrix<LabelType> &confusionMatrix) {
+std::ostream& operator << (std::ostream &os, const ConfusionMatrix<LabelType> &confusionMatrix) {
 	os << "  ";
 	for (const LabelType &label : confusionMatrix.labels) {
 		os << std::setw(4) << label << " ";
