@@ -74,6 +74,7 @@ public:
 	MinMaxScaler(size_t n, double lowerBound, double upperBound): lowerBound(Eigen::VectorXf::Ones(n) * lowerBound),
 	                                                              upperBound(Eigen::VectorXf::Ones(n) * upperBound){
 	}
+
 	virtual ~MinMaxScaler() {}
 
 	void train(const TableView<DataType> &samples) {
@@ -91,6 +92,8 @@ public:
 	DataType operator () (const DataType &sample) const {
 		return (sample - minValues).cwiseQuotient(maxValues - minValues).cwiseProduct(upperBound - lowerBound) + lowerBound;
 	}
+
+	using Scaler::operator();
 
 	std::string toString() const {
 		return "MinMaxScaler";
