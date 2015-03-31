@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 
 	trainSamples = scaler(trainSamples);
 
-	LinearRegressor regressor;
+	LinearRegressor regressor(1000);
 	regressor.train(trainSamples, trainLabels);
 
 	auto predictedLabels = regressor.predict(trainSamples);

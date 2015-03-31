@@ -12,14 +12,14 @@ using Eigen::VectorXf;
 
 class LinearRegressor : public Predictor<VectorXf, double> {
 public:
-	LinearRegressor() {}
+	LinearRegressor(int iterationNumber): iterationNumber(iterationNumber) {}
 
 	void train(const TableView<VectorXf>& samples, const TableView<double>& values) override {
 		featuresNumber = samples.columnsNumber();
 		weights = VectorXf::Zero(featuresNumber);
 
-		double learning_rate = 0.3;
-		for (int iteration = 0; iteration < 500; ++iteration) {
+		double learning_rate = base_learning_rate;
+		for (int iteration = 0; iteration < iterationNumber; ++iteration) {
 			auto sampleIt = samples.begin();
 			auto valueIt = values.begin();
 
@@ -30,7 +30,7 @@ public:
 				++sampleIt;
 				++valueIt;
 			}
-			learning_rate *= 0.99;
+			learning_rate *= decay;
 		}
 	}
 
@@ -43,6 +43,10 @@ public:
 private:
 	int featuresNumber;
 	VectorXf weights;
+
+	int iterationNumber;
+	double base_learning_rate = 0.3;
+	double decay = 0.99;
 };
 
 } // namespace faml
