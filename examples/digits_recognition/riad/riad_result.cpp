@@ -23,7 +23,6 @@ int main() {
 	auto testData = readCSV("mnist_small_train.csv");
 	auto testStr = readCSV("mnist_test_no_label.csv");
 	typedef std::vector<std::string> StrRowType;
-	typedef VectorXf SampleType;
 	typedef unsigned long long Label;
 	Table<StrRowType> trainXstr, trainYstr;
 	std::tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});

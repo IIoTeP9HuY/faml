@@ -66,6 +66,7 @@ std::ostream operator << (std::ostream &os, const ConfusionMatrix<LabelType> &co
 		}
 		os << std::endl;
 	}
+	return os;
 }
 
 template<typename LabelType>

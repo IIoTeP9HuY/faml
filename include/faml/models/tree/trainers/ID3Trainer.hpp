@@ -54,7 +54,7 @@ private:
 		}
 
 		typedef typename std::decay<decltype(x[0][0])>::type T;
-		int size = x.columnsNumber();
+		size_t size = x.columnsNumber();
 		bool split = false;
 		double bestInformativity = std::numeric_limits<double>::min();
 		double bestIndex;

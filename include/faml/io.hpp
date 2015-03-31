@@ -41,7 +41,7 @@ Table< std::vector<std::string> > readCSV(const std::string &filename) {
 
 		RowType data(headerLength);
 
-		for (int i = 0; i < headerLength; ++i) {
+		for (size_t i = 0; i < headerLength; ++i) {
 			std::getline(ss, data[i], ',');
 		}
 

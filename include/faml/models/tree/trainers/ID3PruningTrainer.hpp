@@ -35,10 +35,10 @@ public:
 
 private:
 
-	void rec(TrainedTree& tree, size_t v, size_t parent, const TableView<Row>& x, const TableView<Label>& y) {
+	void rec(TrainedTree &tree, size_t v, int parent, const TableView<Row> &x, const TableView<Label> &y) {
 		assert(x.rowsNumber() == y.rowsNumber());
 		assert(v < tree.size());
-		assert(parent < tree.size() || parent == -1); 
+		assert(parent < static_cast<int>(tree.size()) || parent == -1);
 		if(x.rowsNumber() == 0)
 			return;
 		if(tree.isLeaf(v))
@@ -50,8 +50,8 @@ private:
 				++correctMajor;
 			}
 		}
-		int l = tree.getAsInner(v).l;
-		int r = tree.getAsInner(v).r;
+		auto l = tree.getAsInner(v).l;
+		auto r = tree.getAsInner(v).r;
 		size_t correctAsIs = countCorrectPredictions(y, impl::predict<Label>(tree, x, v));
 		size_t correctL = countCorrectPredictions(y, impl::predict<Label>(tree, x, l));
 		size_t correctR = countCorrectPredictions(y, impl::predict<Label>(tree, x, r));
@@ -86,9 +86,9 @@ private:
 		assert(false);
 	}
 
-	void changeChild(TrainedTree& tree, size_t parent, size_t oldV, size_t newV) {
+	void changeChild(TrainedTree &tree, int parent, size_t oldV, size_t newV) {
 		assert(oldV < tree.size());
-		assert(parent < tree.size() || parent == -1);
+		assert(parent < static_cast<int>(tree.size()) || parent == -1);
 		assert(newV < tree.size());
 		if(parent == -1) {
 			tree.root = newV;

@@ -8,18 +8,21 @@
 #include "faml/quality/classification.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/data/merge.hpp"
-#include <vector>
 
+#include <vector>
 #include <iostream>
+
 using namespace std;
 using namespace faml;
 
 template <typename Row>
-class Discretizator: Scaler<Row> {
+class Discretizer : Scaler<Row> {
 public:
-	virtual ~Discretizator() {}
-	Discretizator(size_t column, size_t C): column(column), C(C) {
+	Discretizer(size_t column, size_t C): column(column), C(C) {
 	}
+
+	virtual ~Discretizer() {}
+
 	virtual void train(const TableView<Row>& x) {
 		borders.clear();
 		vector<double> values;
@@ -29,12 +32,12 @@ public:
 			values.push_back(std::stod(row[column]));
 		}
 		sort(values.begin(), values.end());
-		for(int i = 1; i < C; ++i) {
+		for(size_t i = 1; i < C; ++i) {
 			size_t a = i * values.size() / C;
 			if(a + 1 < values.size())
 				borders.push_back((values[a] + values[a + 1]) / 2);
 		}
-		for(int i = 1; i < C; ++i) {
+		for(size_t i = 1; i < C; ++i) {
 			borders.push_back(values.front() + (values.back() - values.front()) * i / C);
 		}
 		sort(borders.begin(), borders.end());
@@ -50,16 +53,6 @@ public:
 	};
 
 	virtual Row operator() (const Row& row) const {
-		/*if(row[column] == "?") {
-			return Row(borders.size() + 1, "?");
-		}
-		Row result(borders.size() + 1, "0");
-		double value = std::stod(row[column]);
-		for(size_t i = 0; i < borders.size(); ++i) {
-			result[lower_bound(borders.begin(), borders.end(), value) - borders.begin()] = "1";
-		}
-		return result;
-		*/
 		if(row[column] == "?") {
 			assert(false);
 		}
@@ -77,13 +70,9 @@ public:
 	virtual Table<Row> operator() (const TableView<Row>& data) const {
 		vector<string> features;
 		string name = data.columnsNames()[column];
-		double prev = -numeric_limits<double>::infinity();
 		for(double border: borders) {
-			//features.push_back(to_string(prev) + " < " + name + " < " + to_string(border));
 			features.push_back(name + " < " + to_string(border));
-			prev = border;
 		}
-//		features.push_back(to_string(prev) + " < " + name);
 		return data.cast(
 				[&](const Row& row) { return (*this)(row); },
 				features
@@ -94,16 +83,10 @@ public:
 		return "MyDiscretizator";
 	}
 private:
-	size_t C;
 	size_t column;
+	size_t C;
 	vector<double> borders;
 };
-/*int main(int argc, char** argv) {
-	typedef vector<string> Row;
-	typedef string Label;
-	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
-	for(auto column: columns) {*/
-
 
 int main(int argc, char** argv) {
 	if(argc < 3) {
@@ -120,9 +103,9 @@ int main(int argc, char** argv) {
 	typedef string Label;
 	
 	vector<size_t> columns = {0, 2, 4, 10, 11, 12};
-	std::vector<std::shared_ptr<Discretizator<Row>>> discs;
+	std::vector<std::shared_ptr<Discretizer<Row>>> discs;
 	for(auto column: columns) {
-		discs.push_back(make_shared<Discretizator<Row>>(column, 4));
+		discs.push_back(make_shared<Discretizer<Row>>(column, 4));
 	}
 	for(const auto& disc: discs) {
 		disc->train(x);

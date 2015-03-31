@@ -26,7 +26,6 @@ struct DistanceFunction {
 
 struct EuclidianDistance : DistanceFunction<VectorXf> {
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
-		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}
@@ -74,7 +73,6 @@ struct CosineDistance : DistanceFunction<VectorXf> {
 	CosineDistance() {}
 
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
-		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}
@@ -97,7 +95,6 @@ struct CosineDistance : DistanceFunction<VectorXf> {
 
 struct OverlapDistance : DistanceFunction<VectorXf> {
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
-		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}
@@ -152,7 +149,6 @@ struct MahalanobisDistance : DistanceFunction<VectorXf> {
 		inverseCovarianceMatrix(inverseCovarianceMatrix) {}
 
 	double operator ()(const VectorXf &lhs, const VectorXf &rhs) const {
-		size_t N = lhs.size();
 		if (lhs.size() != rhs.size()) {
 			throw std::invalid_argument("Arguments should have same length");
 		}

@@ -39,9 +39,8 @@ public:
 
 	void train(const TableView<Row> &samples, const TableView<Label> &labels) {
 		std::vector<size_t> ind;
-		for(int i = 0; i < samples.rowsNumber(); ++i) {
-	//		if(!bad(samples[i]))
-				ind.push_back(i);
+		for(size_t i = 0; i < samples.rowsNumber(); ++i) {
+            ind.push_back(i);
 		}
 		tree = std::unique_ptr<Tree>(new Tree(trainer.train(samples[ind], labels[ind])));
 		assert(tree->root < tree->size());
