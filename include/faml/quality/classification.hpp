@@ -28,12 +28,25 @@ size_t countCorrectPredictions(const TableView<LabelType> &realLabels, const Tab
 
 template<typename LabelType>
 double accuracyScore(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
-	size_t correctPredictionsNumber = countCorrectPredictions(realLabels, predictedLabels);
-
 	if (realLabels.rowsNumber() == 0) {
 		return 1.0;
 	}
+
+	size_t correctPredictionsNumber = countCorrectPredictions(realLabels, predictedLabels);
 	return correctPredictionsNumber * 1.0 / realLabels.rowsNumber();
+}
+
+template<typename LabelType>
+double logLossScore(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
+	if (realLabels.rowsNumber() == 0) {
+		return 1.0;
+	}
+
+	double logLoss = 0;
+	for (size_t i = 0; i < realLabels.rowsNumber(); ++i) {
+		logLoss += realLabels[i] * log(predictedLabels[i]) + (1 - realLabels[i]) * log(1 - predictedLabels[i]);
+	}
+	return -logLoss / realLabels.rowsNumber();
 }
 
 template<typename LabelType>
