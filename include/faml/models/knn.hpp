@@ -26,7 +26,7 @@ public:
 		this->baseLabels = labels.toTable();
 	}
 
-	LabelType predict(const DataType &sample) {
+	LabelType predict(const DataType &sample) override {
 		if (baseSamples.empty()) {
 			throw std::logic_error("Classifier is not trained");
 		}

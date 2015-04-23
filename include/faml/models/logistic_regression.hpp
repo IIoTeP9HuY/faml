@@ -10,6 +10,8 @@ namespace faml {
 
 template<typename DataType>
 class LogisticRegressor : public Predictor<DataType, double> {
+	using WeightsType = Eigen::VectorXf;
+
 public:
 	LogisticRegressor(int featuresNumber, int iterationNumber):
 		featuresNumber(featuresNumber),
@@ -17,11 +19,9 @@ public:
 	{}
 
 	void train(const TableView<DataType>& samples, const TableView<double>& labels) override {
-		weights = DataType(featuresNumber);
+		weights = WeightsType(featuresNumber);
 
 		double learning_rate = base_learning_rate;
-		int samplesProcessed = 0;
-		int pow2 = 1;
 		for (int iteration = 0; iteration < iterationNumber; ++iteration) {
 			auto sampleIt = samples.begin();
 			auto labelIt = labels.begin();
@@ -29,15 +29,10 @@ public:
 			while (sampleIt != samples.end() && labelIt != labels.end()) {
 				const DataType& sample = *sampleIt;
 				double label = *labelIt;
-				double prediction = 1 / (1 + exp(-weights.dot(sample)));
-				weights -= learning_rate * 2 * (label - prediction) * sample;
+				double prediction = predict(sample);
+				weights += learning_rate * (label - prediction) * sample;
 				++sampleIt;
 				++labelIt;
-				++samplesProcessed;
-				if (samplesProcessed >= pow2) {
-					std::cerr << "Samples processed: " << samplesProcessed << std::endl;
-					pow2 *= 2;
-				}
 			}
 
 			auto predictedLabels = predict(samples);
@@ -49,14 +44,14 @@ public:
 	}
 
 	double predict(const DataType& sample) override {
-		return 1 / (1 + exp(weights.dot(sample)));
+		return 1 / (1 + exp(-sample.dot(weights)));
 	}
 
 	using Predictor<DataType, double>::predict;
 
 private:
 	int featuresNumber;
-	DataType weights;
+	WeightsType weights;
 
 	int iterationNumber;
 	double base_learning_rate = 0.3;

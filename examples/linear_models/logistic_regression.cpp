@@ -28,19 +28,19 @@ int main(int argc, char** argv)
 	Table< std::vector<std::string> > trainLabelsString;
 	std::tie(trainSamplesString, trainLabelsString) = dataset.splitOnColumns({"click"});
 
-	const int hashSpaceSize = 10000;
+	const int hashSpaceSize = 100000;
 
 	cerr << "Transforming dataset" << endl;
 
-	using DataType = SparseVector<double>;
+	using DataType = SparseVector<float>;
 	Table<DataType> trainSamples(trainSamplesString.cast(
 								 [](const std::vector<std::string> &sample) {
 								 		auto hasher = std::hash<string>();
 								 		auto features = DataType(hashSpaceSize);
-										for (int i = 0; i < sample.size(); ++i) {
+										for (size_t i = 0; i < sample.size(); ++i) {
 											auto string_feature = to_string(i) + "_" + sample[i];
 											int feature = hasher(string_feature) % hashSpaceSize;
-											features.insert(feature) = 1;
+											features.coeffRef(feature) = 1;
 										}
 										return features;
 									}
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 								 ));
 
 	cerr << "Training logistic regression" << endl;
-	LogisticRegressor<DataType> regressor(hashSpaceSize, 10);
+	LogisticRegressor<DataType> regressor(hashSpaceSize, 100);
 	regressor.train(trainSamples, trainLabels);
 
 	auto predictedLabels = regressor.predict(trainSamples);
