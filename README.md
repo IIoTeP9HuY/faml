@@ -6,6 +6,7 @@ The aim of this library is to implement various machine learning methods in fast
 * KNN
 * Decision Tree
 * Linear regression
+* Logistic regression
 
 ####Requirements:
 * gcc >= 4.8 or clang >= 3.5
