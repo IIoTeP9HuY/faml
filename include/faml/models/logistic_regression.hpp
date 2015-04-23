@@ -10,7 +10,8 @@ namespace faml {
 
 template<typename DataType>
 class LogisticRegressor : public Predictor<DataType, double> {
-	using WeightsType = Eigen::VectorXf;
+	//using WeightsType = Eigen::VectorXf;
+	using WeightsType = DataType;
 
 public:
 	LogisticRegressor(int featuresNumber, int iterationNumber):
@@ -30,7 +31,7 @@ public:
 				const DataType& sample = *sampleIt;
 				double label = *labelIt;
 				double prediction = predict(sample);
-				weights += learning_rate * (label - prediction) * sample;
+				weights += sample * learning_rate * (label - prediction);
 				++sampleIt;
 				++labelIt;
 			}

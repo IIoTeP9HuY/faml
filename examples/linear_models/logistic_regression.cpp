@@ -2,6 +2,7 @@
 #include "faml/models/logistic_regression.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/quality/classification.hpp"
+#include "faml/algebra/sparse_vector.hpp"
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Sparse>
@@ -32,7 +33,8 @@ int main(int argc, char** argv)
 
 	cerr << "Transforming dataset" << endl;
 
-	using DataType = SparseVector<float>;
+	//using DataType = Eigen::SparseVector<float>;
+	using DataType = faml::SparseVector<float>;
 	Table<DataType> trainSamples(trainSamplesString.cast(
 								 [](const std::vector<std::string> &sample) {
 								 		auto hasher = std::hash<string>();
@@ -40,7 +42,8 @@ int main(int argc, char** argv)
 										for (size_t i = 0; i < sample.size(); ++i) {
 											auto string_feature = to_string(i) + "_" + sample[i];
 											int feature = hasher(string_feature) % hashSpaceSize;
-											features.coeffRef(feature) = 1;
+											//features.coeffRef(feature) = 1;
+											features.setValue(feature, 1);
 										}
 										return features;
 									}
