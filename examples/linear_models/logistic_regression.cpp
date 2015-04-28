@@ -55,6 +55,9 @@ int main(int argc, char** argv)
 									}
 								 ));
 
+	trainSamplesString.clear();
+	trainLabelsString.clear();
+
 	cerr << "Training logistic regression" << endl;
 	LogisticRegressor<DataType> regressor(hashSpaceSize, 100);
 	regressor.train(trainSamples, trainLabels);
