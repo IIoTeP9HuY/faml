@@ -13,6 +13,10 @@ public:
 	virtual void train(const TableView<Row>&, const TableView<Label>&) = 0;
 	virtual Label predict(const Row&) = 0;
 
+	virtual Label predict(const std::pair<Row, Label> sampleAndLabel) {
+		return predict(sampleAndLabel.first);
+	}
+
 	virtual Table<Label> predict(const TableView<Row> &samples) {
 		std::vector<Label> predictions(samples.rowsNumber());
 

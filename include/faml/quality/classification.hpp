@@ -37,6 +37,11 @@ double accuracyScore(const TableView<LabelType> &realLabels, const TableView<Lab
 }
 
 template<typename LabelType>
+inline double logLossValue(LabelType real, LabelType predicted) {
+	return -real * log(predicted) + (1 - real) * log(1 - predicted);
+}
+
+template<typename LabelType>
 double logLossScore(const TableView<LabelType> &realLabels, const TableView<LabelType> &predictedLabels) {
 	if (realLabels.rowsNumber() == 0) {
 		return 1.0;
@@ -44,9 +49,9 @@ double logLossScore(const TableView<LabelType> &realLabels, const TableView<Labe
 
 	double logLoss = 0;
 	for (size_t i = 0; i < realLabels.rowsNumber(); ++i) {
-		logLoss += realLabels[i] * log(predictedLabels[i]) + (1 - realLabels[i]) * log(1 - predictedLabels[i]);
+		logLoss += logLossValue(realLabels[i], predictedLabels[i]);
 	}
-	return -logLoss / realLabels.rowsNumber();
+	return logLoss / realLabels.rowsNumber();
 }
 
 template<typename LabelType>
