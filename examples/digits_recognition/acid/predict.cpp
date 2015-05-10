@@ -11,7 +11,7 @@
 #include "faml/data/table.hpp"
 #include "faml/kernels.hpp"
 #include "faml/distances.hpp"
-#include "faml/io.hpp"
+#include "faml/io/io.hpp"
 #include "faml/models/knn.hpp"
 #include "faml/preprocessing/scaler.hpp"
 #include "faml/quality/classification.hpp"

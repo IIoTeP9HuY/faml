@@ -1,93 +1,13 @@
-#ifndef IO_HPP
-#define IO_HPP
+#pragma once
 
-#include <fstream>
-#include <sstream>
-#include <algorithm>
+#include "io.hpp"
+#include "readers.hpp"
 
-#include "data/table.hpp"
-#include "algebra/sparse_vector.hpp"
+#include "faml/algebra/sparse_vector.hpp"
+
+#include <vector>
 
 namespace faml {
-
-std::vector<std::string> parseCSVHeader(const std::string& line) {
-	std::vector<std::string> header;
-
-	std::istringstream ss(line);
-	std::string token;
-	while (std::getline(ss, token, ',')) {
-		header.push_back(token);
-	}
-
-	return header;
-}
-
-std::vector<std::string> readCSVHeader(std::ifstream &inputStream) {
-	std::string line;
-	std::getline(inputStream, line);
-	return parseCSVHeader(line);
-}
-
-Table< std::vector<std::string> > readCSV(const std::string &filename,
-											bool withHeader=true) {
-	typedef std::vector<std::string> RowType;
-	std::ifstream inputStream(filename);
-	std::vector<std::string> header;
-	if (withHeader) {
-		header = readCSVHeader(inputStream);
-	}
-	size_t headerLength = header.size();
-	Table<RowType> table(header);
-
-	while (!inputStream.eof()) {
-		std::string line;
-		getline(inputStream, line);
-
-		if (!headerLength) {
-			headerLength = std::count(line.begin(), line.end(), ',') + 1;
-			for (size_t i = 0; i < headerLength; ++i) {
-				header.push_back(std::to_string(i));
-			}
-			table = Table<RowType>(header);
-		}
-
-		if (inputStream.eof()) {
-			break;
-		}
-
-		std::istringstream ss(line);
-
-		RowType data(headerLength);
-
-		for (size_t i = 0; i < headerLength; ++i) {
-			std::getline(ss, data[i], ',');
-		}
-
-		table.addRow(data);
-	}
-	return table;
-}
-
-class FileReader {
-public:
-	FileReader(const std::string& filename): ifs(filename) {
-		// TODO(acid) Check if open
-	}
-
-	std::string getLine() {
-		std::getline(ifs, buf);
-
-		if (ifs.eof()) {
-			return "";
-		}
-
-		return buf;
-	}
-
-private:
-	std::string buf;
-	std::ifstream ifs;
-};
 
 class CSVToSparseParser {
 public:
@@ -164,13 +84,6 @@ private:
 	int rowNumber = 0;
 };
 
-template<typename FileReader>
-class ReaderFactory {
-public:
-	std::unique_ptr<FileReader> getInstance(const std::string& filename) const {
-		return std::unique_ptr<FileReader>(new FileReader(filename));
-	}
-};
 
 class CSVToSparseParserFactory {
 public:
@@ -192,5 +105,3 @@ private:
 };
 
 } // namespace faml
-
-#endif // IO_HPP

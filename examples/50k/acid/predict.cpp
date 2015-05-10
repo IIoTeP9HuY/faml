@@ -7,7 +7,7 @@
 #include <tuple>
 #include <memory>
 
-#include "faml/io.hpp"
+#include "faml/io/io.hpp"
 #include "faml/data/table.hpp"
 #include "faml/models/tree.hpp"
 #include "faml/models/tree/trainers/ID3Trainer.hpp"
