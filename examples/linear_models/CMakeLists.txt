@@ -1,5 +1,0 @@
-add_executable(linear_regression linear_regression.cpp)
-target_link_libraries(linear_regression faml)
-
-add_executable(logistic_regression logistic_regression.cpp)
-target_link_libraries(logistic_regression faml)

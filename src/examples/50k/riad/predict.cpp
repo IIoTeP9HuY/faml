@@ -1,13 +1,13 @@
-#include "faml/io/io.hpp"
-#include "faml/utility/utility.hpp"
-#include "faml/models/tree.hpp"
-#include "faml/models/tree/trainers/ID3PruningTrainer.hpp"
-#include "faml/statistics/informativity_criteria.hpp"
-#include "faml/cross_validation/cross_validation.hpp"
-#include "faml/cross_validation/shuffle_split.hpp"
-#include "faml/quality/classification.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/data/merge.hpp"
+#include <faml/io/io.hpp>
+#include <faml/utility/utility.hpp>
+#include <faml/models/tree.hpp>
+#include <faml/models/tree/trainers/ID3PruningTrainer.hpp>
+#include <faml/statistics/informativity_criteria.hpp>
+#include <faml/cross_validation/cross_validation.hpp>
+#include <faml/cross_validation/shuffle_split.hpp>
+#include <faml/quality/classification.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/data/merge.hpp>
 
 #include <vector>
 #include <iostream>
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
 	auto y = _y.cast(firstElement<vector<string>>);
 	typedef vector<string> Row;
 	typedef string Label;
-	
+
 	vector<size_t> columns = {0, 2, 4, 10, 11, 12};
 	std::vector<std::shared_ptr<Discretizer<Row>>> discs;
 	for(auto column: columns) {

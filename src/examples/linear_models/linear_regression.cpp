@@ -1,7 +1,7 @@
-#include "faml/io/io.hpp"
-#include "faml/models/linear_regression.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/quality/regression.hpp"
+#include <faml/io/io.hpp>
+#include <faml/models/linear_regression.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/quality/regression.hpp>
 
 #include <eigen3/Eigen/Core>
 

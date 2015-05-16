@@ -6,14 +6,14 @@
 #include <tuple>
 #include <memory>
 
-#include "faml/data/table.hpp"
-#include "faml/kernels.hpp"
-#include "faml/distances.hpp"
-#include "faml/io/io.hpp"
-#include "faml/models/knn.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/cross_validation/cross_validation.hpp"
-#include "faml/quality/classification.hpp"
+#include <faml/data/table.hpp>
+#include <faml/kernels.hpp>
+#include <faml/distances.hpp>
+#include <faml/io/io.hpp>
+#include <faml/models/knn.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/cross_validation/cross_validation.hpp>
+#include <faml/quality/classification.hpp>
 
 using namespace std;
 using namespace faml;
@@ -27,7 +27,7 @@ int main() {
 	Table<StrRowType> trainXstr, trainYstr;
 	tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});
 	auto trainY = trainYstr.cast(
-		[](const StrRowType &sample) { 
+		[](const StrRowType &sample) {
 			return stoull(sample[0]);
 		}
 	);
@@ -54,7 +54,7 @@ int main() {
 			return res;
 		}
 	);
-	 
+
 	size /= 2;
 
 	cerr << "after" << endl;
@@ -64,7 +64,7 @@ int main() {
 		}
 	);
 
-	
+
 	test = test.cast(
 		[](const VectorXf& v) {
 			VectorXf res = VectorXf::Zero(14 * 14);

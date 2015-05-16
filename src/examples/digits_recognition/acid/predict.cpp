@@ -8,17 +8,17 @@
 
 #include <eigen3/Eigen/LU>
 
-#include "faml/data/table.hpp"
-#include "faml/kernels.hpp"
-#include "faml/distances.hpp"
-#include "faml/io/io.hpp"
-#include "faml/models/knn.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/quality/classification.hpp"
-#include "faml/statistics/statistics.hpp"
-#include "faml/cross_validation/shuffle_split.hpp"
-#include "faml/cross_validation/cross_validation.hpp"
-#include "faml/cross_validation/kfold.hpp"
+#include <faml/data/table.hpp>
+#include <faml/kernels.hpp>
+#include <faml/distances.hpp>
+#include <faml/io/io.hpp>
+#include <faml/models/knn.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/quality/classification.hpp>
+#include <faml/statistics/statistics.hpp>
+#include <faml/cross_validation/shuffle_split.hpp>
+#include <faml/cross_validation/cross_validation.hpp>
+#include <faml/cross_validation/kfold.hpp>
 
 using namespace std;
 using namespace faml;
@@ -90,7 +90,7 @@ void removeOutliers(Table<DataType> *samples,
 			std::cerr << "Other bin: " << i << std::endl;
 			std::cerr << "Other distance outliers: " << currentOtherNumber << std::endl;
 			std::cerr << "Other distance lower bound: " << otherLowerBound << std::endl;
-			break;	
+			break;
 		}
 	}
 
@@ -102,7 +102,7 @@ void removeOutliers(Table<DataType> *samples,
 			std::cerr << "Native bin: " << i << std::endl;
 			std::cerr << "Native distance outliers: " << currentNativeNumber << std::endl;
 			std::cerr << "Native distance upper bound: " << nativeUpperBound << std::endl;
-			break;	
+			break;
 		}
 	}
 
@@ -128,7 +128,7 @@ void removeOutliers(Table<DataType> *samples,
 */
 
 /*
-matrix<double> findOptimalWeights(const std::vector<sample_type> &samples, 
+matrix<double> findOptimalWeights(const std::vector<sample_type> &samples,
 									const std::vector<label> &labels, double alpha, int power) {
 
 	size_t featuresDimension = samples[0].size();

@@ -1,10 +1,10 @@
-#include "faml/io/parsers.hpp"
-#include "faml/io/readers.hpp"
-#include "faml/models/logistic_regression.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/quality/classification.hpp"
-#include "faml/algebra/sparse_vector.hpp"
-#include "faml/data/file_streaming_table.hpp"
+#include <faml/io/parsers.hpp>
+#include <faml/io/readers.hpp>
+#include <faml/models/logistic_regression.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/quality/classification.hpp>
+#include <faml/algebra/sparse_vector.hpp>
+#include <faml/data/file_streaming_table.hpp>
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Sparse>
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	// TODO(acid) Print some stats about file here (size, etc)
 	//Table<vector<string>> dataset(readCSV(datasetFilename));
 	//cerr << "Rows: " << dataset.rowsNumber() << ", Columns: " << dataset.columnsNumber() << endl;
-	
+
 	cerr << "Training logistic regression" << endl;
 	LogisticRegressor<DataType> regressor(hashSpaceSize, 100);
 	regressor.train(dataset);

@@ -6,16 +6,16 @@
 #include <tuple>
 #include <memory>
 
-#include "faml/data/table.hpp"
-#include "faml/kernels.hpp"
-#include "faml/distances.hpp"
-#include "faml/io/io.hpp"
-#include "faml/models/knn.hpp"
-#include "faml/preprocessing/scaler.hpp"
-#include "faml/cross_validation/cross_validation.hpp"
-#include "faml/quality/classification.hpp"
-#include "faml/cross_validation/kfold.hpp"
-#include "faml/cross_validation/shuffle_split.hpp"
+#include <faml/data/table.hpp>
+#include <faml/kernels.hpp>
+#include <faml/distances.hpp>
+#include <faml/io/io.hpp>
+#include <faml/models/knn.hpp>
+#include <faml/preprocessing/scaler.hpp>
+#include <faml/cross_validation/cross_validation.hpp>
+#include <faml/quality/classification.hpp>
+#include <faml/cross_validation/kfold.hpp>
+#include <faml/cross_validation/shuffle_split.hpp>
 
 using namespace std;
 using namespace faml;
@@ -42,8 +42,8 @@ int main() {
 	std::tie(trainXstr, trainYstr) = testData.splitOnColumns({"label"});
 	cerr << "splitted" << endl;
 	auto trainY = trainYstr.cast(
-		[](const StrRowType &sample) { 
-			return std::stoull(sample[0]); 
+		[](const StrRowType &sample) {
+			return std::stoull(sample[0]);
 		}
 	);
 	cerr << "casted Y" << endl;
