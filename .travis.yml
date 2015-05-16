@@ -16,4 +16,5 @@ before_script:
 
 script:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-  - cmake .. && make
+  - cmake -DENABLE_TESTING=ON .. && make
+  - ./src/tests/faml-tests
