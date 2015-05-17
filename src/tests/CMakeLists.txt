@@ -17,7 +17,13 @@ LINK_DIRECTORIES(${GTEST_BINARY_DIR} ${GMOCK_BINARY_DIR})
 set(CMAKE_BUILD_TYPE "Debug")
 add_definitions(-std=c++0x -Wall -pedantic -Wextra)
 
-set(SOURCES main.cpp)
+set(SOURCE_MAIN main.cpp)
+
+set(SOURCES_TEST
+	   test_tables.cpp
+)
+
+set(SOURCES ${SOURCE_MAIN} ${SOURCES_TEST})
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
