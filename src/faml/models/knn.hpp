@@ -21,7 +21,7 @@ public:
 		}
 	}
 
-	void train(const TableView<DataType> &samples, const TableView<LabelType> &labels) {
+	void train(const TableView<DataType> &samples, const TableView<LabelType> &labels) override {
 		this->baseSamples = samples.toTable();
 		this->baseLabels = labels.toTable();
 	}
@@ -53,7 +53,7 @@ public:
 		return std::max_element(labelWeight.begin(), labelWeight.end(), labelWeightPairComparator)->first;
 	}
 
-	Table<LabelType> predict(const TableView<DataType> &samples) {
+	Table<LabelType> predict(const TableView<DataType> &samples) override {
 		std::vector<LabelType> predictions(samples.rowsNumber());
 
 		#pragma omp parallel for
